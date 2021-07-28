@@ -1,0 +1,22 @@
+# Basics Parameters
+datasetPath = '/media/victor/Data/Documents/S4/MatchNMingle/Mingle/'
+savePath = './res/'
+day = 1
+cam = 1
+
+# EM Parameters
+emActivated = False
+
+# PS Parameters
+frameStart = 15000
+frameEnd = 20000
+alphaMin = 0
+alphaMax = 120
+alphaStep = 30
+betaMin = 0.05
+betaMax = 0.25
+betaStep = 0.05
+gammaMin = 0
+gammaMax = 1
+gammaStep = 0.25
+psActivated = False
