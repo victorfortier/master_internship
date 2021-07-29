@@ -10,8 +10,6 @@ from Tools import getParameters, getValue, openCSV, isNaN, timeToFrame, getAlpha
 from Tools import getManualAnnotations, getInfoForF_formationDetection
 from Tools import videoFormatToFrameFormatForF_formation, f_formationCorrection, show_f_formation
 
-from GroupsMemory import GroupsMemory
-
 # Trackbars callback functions
 def change_keypointsAndOrientations_shown(val):
 	global keypointsAndOrientations_shown
@@ -109,8 +107,8 @@ camera.initPS(savePath, frameStart, frameEnd, alphaMin, alphaMax, alphaStep, bet
 # Initialisation du detecteur d'humains (HD)
 camera.initHD('./src/socialCuesDetection/')
 
-#
-gm = GroupsMemory(visualFieldsClusteringStrategy, 1/camera.FPS)
+# Initialisation de la memoire des participants (PM)
+camera.initPM(1)
 
 # Nom des sliders qui apparaitront sous la video
 keypointsAndOrientations_trackbar       = 'Keypoints and Orientations'
@@ -302,10 +300,9 @@ while True:
 		strategiesActivated.append(oCentersClusteringStrategy.__name__)
 	# Algorithme 3 : Detection des F-formations par clustering des champs visuels des individus
 	if visualFieldsClusteringStrategy_shown:
-		#f_formation_pred = visualFieldsClusteringStrategy(camera.frame, participantsID, positions, orientations, alpha=getAlpha(camera), beta=getBeta(camera), gamma=getGamma(camera), verbose=visualFieldsClusteringStrategy_verbose)
-		gm.update(camera.frame, participantsID, positions, orientations)
-		#visualFieldsClusteringStrategy_disp = show_f_formation(f_formation_pred, participantsID, positions, camera.frame, (0, 255, 0))
-		#cv2.imshow('F-formation Detection : Visual Fields Clustering Strategy', visualFieldsClusteringStrategy_disp)
+		f_formation_pred = visualFieldsClusteringStrategy(camera.frame, participantsID, positions, orientations, alpha=getAlpha(camera), beta=getBeta(camera), gamma=getGamma(camera), verbose=visualFieldsClusteringStrategy_verbose)
+		visualFieldsClusteringStrategy_disp = show_f_formation(f_formation_pred, participantsID, positions, camera.frame, (0, 255, 0))
+		cv2.imshow('F-formation Detection : Visual Fields Clustering Strategy', visualFieldsClusteringStrategy_disp)
 		strategiesActivated.append(visualFieldsClusteringStrategy.__name__)
 	# Affichage de la frame actuelle
 	camera.show_frame()
@@ -313,6 +310,8 @@ while True:
 	camera.em.update(participantsID, f_formation_true, f_formation_pred, strategiesActivated)
 	# Mise a jour de la recherche de parametres
 	camera.ps.update(participantsID, f_formation_true, f_formation_pred)
+	# Mise a jour de la memoire des participants
+	camera.pm.update(participantsID, positions, f_formation_pred, strategiesActivated)
 
 cv2.destroyAllWindows()
 camera.capture.release()

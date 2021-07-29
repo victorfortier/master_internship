@@ -35,7 +35,6 @@ def getParameters():
 		PARAMETERS[key] = eval(value)
 	return PARAMETERS
 
-
 def getValue(dico, key, defaultValue):
 	"""
 	Retourne la valeur d'une clef d'un dictionnaire si la clef existe, une valeur par defaut sinon.

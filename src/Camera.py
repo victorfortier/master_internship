@@ -2,6 +2,7 @@ import cv2
 from EvaluationMode import EvaluationMode
 from ParameterSearching import ParameterSearching
 from SocialCuesDetection import HumanDetector
+from ParticipantsMemory import ParticipantsMemory
 
 class Camera(object):
     """
@@ -24,17 +25,20 @@ class Camera(object):
     em                  : EvaluationMode,
     ps                  : ParameterSearching,
     hd                  : HumanDetector,
+    pm                  : ParticipantsMemory,
     pause               : bool,
     quit                : bool,
     emActivated         : bool,
     psActivated         : bool,
     savePositiveSamples : bool,
+    pmActivated         : bool,
     
     Methods
     -------
     initEM         : public
     initPS         : public
     initHD         : public
+    initPM         : public
     update         : public
     show_frame     : public
     add_cbox       : public
@@ -81,6 +85,7 @@ class Camera(object):
         self.em = None
         self.ps = None
         self.hd = None
+        self.pm = None
         # Initialise deux booleans qui controlent la video (pour mettre la video sur pause ou la fermer)
         self.pause = False
         self.quit = False
@@ -89,6 +94,8 @@ class Camera(object):
         self.psActivated = False
         # Initialise un boolean qui controle la sauvegarde des boite englobantes de la frame actuelle
         self.savePositiveSamples = False
+        # Initialise un boolean qui controle l'evolution de la memoire des participants a la scene
+        self.pmActivated = False
     
     def initEM(self, savePath, emActivated=False):
         """
@@ -138,7 +145,13 @@ class Camera(object):
         savePath : str,
         """
         self.hd = HumanDetector(self, savePath)
-    
+
+    def initPM(self, dt, tau_learn=3, tau_forget=8, memory_threshold=0.5):
+        """
+        Initialise la memoire des participants.
+        """
+        self.pm = ParticipantsMemory(self, dt, tau_learn=tau_learn, tau_forget=tau_forget, memory_threshold=memory_threshold)
+
     def update(self):
         """
         Mise a jour de la capture. Prend en compte le cas ou la frame a ete modifiee par l'utilisateur avec la barre de lecture.
@@ -152,7 +165,12 @@ class Camera(object):
                 if self.status:
                     self.frame_copy = self.frame.copy()
                     self.frameCannotChanged = True
-                    self.frameStep = 20 if self.emActivated else 1
+                    if self.emActivated:
+                        self.frameStep = 20
+                    if self.pmActivated:
+                        self.frameStep = self.FPS
+                    else:
+                        self.frameStep = 1
                     self.frameId += self.frameStep
                     cv2.setTrackbarPos(self.frame_trackbar, self.window_name, self.frameId)
                     self.frameCannotChanged = False
@@ -194,7 +212,7 @@ class Camera(object):
     
     def __keyStatus(self, delay):
         """
-        Verifie si une touche du clavier (q, p, e ou c) a ete pressee par l'utilisateur.
+        Verifie si une touche du clavier (q, p, e, s ou m) a ete pressee par l'utilisateur.
 
         Parameter
         ---------
@@ -212,8 +230,12 @@ class Camera(object):
                 self.emActivated = not self.emActivated
             if self.pause:
                 self.__keyStatus(0)
-        elif key == ord('c'):
+        elif key == ord('s'):
             self.savePositiveSamples = True
+        elif key == ord('m'):
+            self.pmActivated = not self.pmActivated
+            if self.pause:
+                self.__keyStatus(0)
         else:
             if self.pause:
                 self.__keyStatus(0)
