@@ -31,12 +31,15 @@ class ParticipantsMemory(object):
         #
         self.memory_threshold = memory_threshold
         #
+        self.__initParams()
+    
+    def __initParams(self):
+        """
+        Initialisation (ou reanitialisation) des parametres pour la memoire des participants.
+        """
         self.cpt = 0
-        #
         self.detectionStrategy = None
         self.participantsID = None
-        self.positions = None
-        self.groups = None
         self.groups_with_memory = None
         self.memory = None
         self.memory_array = None
@@ -44,11 +47,26 @@ class ParticipantsMemory(object):
     def update(self, participantsID, positions, groups, strategiesActivated):
         """
         """
+        # Aucun groupe predit : aucune methode de detection de F-formations est en cours de traitement.
+        if groups is None:
+            if self.camera.pmActivated:
+                # Les participants ne peuvent pas memoriser les membres de leurs groupes si aucune F-formation n'est predite.
+                if self.cpt == 0:
+                    print('Participants Memory cannot start. No predict F-formation to process.')
+                    self.camera.pmActivated = False
+                    return False
+                # Les participants ne peuvent plus mémoriser les membres de leurs groupes si plus aucune F-formation n'est predite.
+                else:
+                    print('Participants Memory cannot continue. No more predict F-formation.')
+                    self.camera.pmActivated = False
+                    return self.update(participantsID, positions, [], [])
+            return False
         if self.camera.pmActivated:
-            self.positions = positions
-            self.groups = groups
-            labels = f_formationToLabels(self.groups, participantsID)
             if self.cpt == 0:
+                if len(strategiesActivated) != 1:
+                    print('Participants Memory cannot start. More than one detection strategy is used.')
+                    self.camera.pmActivated = False
+                    return False
                 self.detectionStrategy = strategiesActivated[0]
                 self.participantsID = participantsID
                 self.memory = {}
@@ -57,7 +75,16 @@ class ParticipantsMemory(object):
                     for id2 in self.participantsID:
                         if id1 != id2:
                             self.memory[id1][id2] = self.memory_threshold
+                print('Participants Memory Activated!')
             else:
+                if len(strategiesActivated) != 1:
+                    print('Participants Memory cannot continue. More than one detection strategy is used.')
+                    self.camera.pmActivated = False
+                    return self.update(participantsID, positions, [], [self.detectionStrategy])
+                if len(strategiesActivated) == 1 and strategiesActivated[0] != self.detectionStrategy:
+                    print('Participants Memory cannot continue. The detection strategy changed.')
+                    self.camera.pmActivated = False
+                    return self.update(participantsID, positions, [], [self.detectionStrategy])
                 # Suppression de la memoire des participants qui ont quittes la scene
                 old_participants = list(set(self.participantsID.tolist()).difference(set(participantsID.tolist())))
                 if len(old_participants) != 0:
@@ -79,6 +106,7 @@ class ParticipantsMemory(object):
                                 self.memory[id1][id] = self.memory_threshold
             # Mise a jour de la memoire de chaque participants
             self.participantsID = participantsID
+            labels = f_formationToLabels(groups, self.participantsID)
             for id1 in self.memory.keys():
                 g_i = labels[np.argwhere(self.participantsID == id1)]
                 for id2 in self.memory[id1].keys():
@@ -97,9 +125,19 @@ class ParticipantsMemory(object):
                     self.memory_array[i,j] = self.memory[id1][id2]
             self.__show_memory()
             self.__computeGroupsWithMemory()
-            cv2.imshow(self.detectionStrategy+' with Individual Memory', show_f_formation(self.groups_with_memory, self.participantsID, self.positions, self.camera.frame, (0, 127, 255)))
+            cv2.imshow(self.detectionStrategy+' with Individual Memory', show_f_formation(self.groups_with_memory, self.participantsID, positions, self.camera.frame, (0, 127, 255)))
             self.cpt += 1
-    
+            return False
+        else:
+            # La memoire des participants vient juste d'etre stoppee par l'utilisateur. Il ne reste plus qu'a sauvegarder les resultats.
+            if self.cpt > 0:
+                print('Participants Memory Stopped!')
+                cv2.destroyWindow('Participants Memory')
+                cv2.destroyWindow(self.detectionStrategy+' with Individual Memory')
+                self.__initParams()
+                return True
+            return False
+
     def __learning(self, m):
         """
         """

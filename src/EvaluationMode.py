@@ -22,7 +22,8 @@ class EvaluationMode(object):
 
     Method
     ------
-    update : public
+    initParams : private
+    update     : public
     """
 
     def __init__(self, camera, savePath):
@@ -34,6 +35,12 @@ class EvaluationMode(object):
         """
         self.camera = camera
         self.savePath = savePath
+        self.__initParams()
+    
+    def __initParams(self):
+        """
+        Initialisation (ou reanitialisation) des parametres pour le mode evaluation.
+        """
         self.detectionStrategy = None
         self.frameIdList = []
         self.ARI_list1 = []
