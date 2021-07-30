@@ -18,7 +18,7 @@ def getParameters():
 
 	Return
 	------
-	PARAMETERS : dict,
+	PARAMETERS : dict{key: str, value: str | int | float | bool},
 	"""
 	with open('PARAMETERS.txt', 'r') as reader:
 		lines = reader.readlines()
@@ -41,13 +41,13 @@ def getValue(dico, key, defaultValue):
 
 	Parameters
 	----------
-	dico         : dict,
-	key          : Any1,
-	defaultValue : Any2,
+	dico         : dict{key: str, value: str | int | float | bool},
+	key          : str,
+	defaultValue : str | int | float | bool,
 	
 	Return
 	------
-	value : Any2,
+	value : str | int | float | bool,
 	"""
 	value = dico[key] if key in dico else defaultValue
 	return value

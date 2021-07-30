@@ -146,11 +146,19 @@ class Camera(object):
         """
         self.hd = HumanDetector(self, savePath)
 
-    def initPM(self, dt, tau_learn=3, tau_forget=8, memory_threshold=0.5):
+    def initPM(self, savePath, dt, tau_learn=3, tau_forget=8, memory_threshold=0.5):
         """
         Initialise la memoire des participants.
+
+        Parameters
+        ----------
+        savePath         : str,
+        dt               : float,
+        tau_learn        : float (optional),
+        tau_forget       : float (optional),
+        memory_threshold : float (optional),
         """
-        self.pm = ParticipantsMemory(self, dt, tau_learn=tau_learn, tau_forget=tau_forget, memory_threshold=memory_threshold)
+        self.pm = ParticipantsMemory(self, savePath, dt, tau_learn=tau_learn, tau_forget=tau_forget, memory_threshold=memory_threshold)
 
     def update(self):
         """
@@ -168,7 +176,7 @@ class Camera(object):
                     if self.emActivated:
                         self.frameStep = 20
                     if self.pmActivated:
-                        self.frameStep = self.FPS
+                        self.frameStep = int(self.FPS * self.pm.dt)
                     else:
                         self.frameStep = 1
                     self.frameId += self.frameStep

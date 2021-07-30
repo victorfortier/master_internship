@@ -108,7 +108,7 @@ camera.initPS(savePath, frameStart, frameEnd, alphaMin, alphaMax, alphaStep, bet
 camera.initHD('./src/socialCuesDetection/')
 
 # Initialisation de la memoire des participants (PM)
-camera.initPM(1)
+camera.initPM(savePath, 1)
 
 # Nom des sliders qui apparaitront sous la video
 keypointsAndOrientations_trackbar       = 'Keypoints and Orientations'

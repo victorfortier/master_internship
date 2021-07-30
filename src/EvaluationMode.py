@@ -18,7 +18,7 @@ class EvaluationMode(object):
     ARI_list1 : list[float],
     ARI_list2 : list[float],
     labels_pred_t0 : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-    logs : dict,
+    logs : dict{key: str, value: int | float | list[Tuple[int, float]]},
 
     Method
     ------
