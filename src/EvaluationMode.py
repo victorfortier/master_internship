@@ -135,8 +135,8 @@ class EvaluationMode(object):
                     sortByGreatestInstabilities = list(zip(self.frameIdList, self.ARI_list2))
                     sortByGreatestInstabilities.sort(key=lambda x: x[1])
                     self.logs['greatest_instabilities'] = sortByGreatestInstabilities[:10]
-                path = self.savePath+self.detectionStrategy+'/day='+str(self.camera.day)+'_cam='+str(self.camera.cam)+'_frame_start='
-                path += str(self.logs['frame_start'])+'_frame_end='+str(self.logs['frame_end'])+('_'+suffix if suffix is not None else '')
+                path = self.savePath+self.detectionStrategy+'/day='+str(self.camera.day)+'_cam='+str(self.camera.cam)
+                path += '_frame_start='+str(self.logs['frame_start'])+'_frame_end='+str(self.logs['frame_end'])+('_'+suffix if suffix is not None else '')
                 if not os.path.exists(path):
                     os.mkdir(path)
                     f = open(path+"/logs.txt", 'w')

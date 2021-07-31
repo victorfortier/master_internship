@@ -5,15 +5,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import networkx as nx
 import os
-import pandas as pd
 import numpy as np
-import seaborn as sns
 from networkx.algorithms.clique import enumerate_all_cliques
 from PIL import Image
-from Tools import show_f_formation, f_formationToLabels, fig2img
-
-mpl.style.use('seaborn')
-fontsize = plt.rcParams['axes.titlesize']
+from Figures import plot_heatmap_memory, save_memory_evolution
+from Tools import show_f_formation, f_formationToLabels
 
 class ParticipantsMemory(object):
     """
@@ -33,7 +29,8 @@ class ParticipantsMemory(object):
     memory                       : dict{key: int, value: dict{key: int, value: float}},
     memory_array                 : float [n_p, n_p] array,
     groups_with_memory           : list[list[int]],
-    groups_with_memory_corrected : list[list[int]]
+    groups_with_memory_corrected : list[list[int]],
+    memory_evolution             : list[dict{key: int, value: dict{key: int, value: float}}],
     memory_evolution_video       : VideoWriter,
 
     Methods
@@ -85,6 +82,7 @@ class ParticipantsMemory(object):
         self.memory_array = None
         self.groups_with_memory = None
         self.groups_with_memory_corrected = None
+        self.memory_evolution = []
         self.memory_evolution_video = None 
     
     def update(self, participantsID, positions, groups, strategiesActivated):
@@ -180,6 +178,13 @@ class ParticipantsMemory(object):
             self.__computeGroupsWithMemory()
             cv2.imshow(self.detectionStrategy+' with Individual Memory', show_f_formation(self.groups_with_memory, self.participantsID, positions, self.camera.frame, (0, 127, 255)))
             cv2.imshow(self.detectionStrategy+' with Individual Memory (Corrected)', show_f_formation(self.groups_with_memory_corrected, self.participantsID, positions, self.camera.frame, (158, 108, 253)))
+            memory_copy = {}
+            for id1 in self.memory.keys():
+                memory_id1_copy = {}
+                for id2 in self.memory[id1].keys():
+                    memory_id1_copy[id2] = self.memory[id1][id2]
+                memory_copy[id1] = memory_id1_copy
+            self.memory_evolution.append(memory_copy)
             self.frameIdList.append(self.camera.frameId)
             self.cpt += 1
             return False
@@ -191,9 +196,30 @@ class ParticipantsMemory(object):
                 cv2.destroyWindow(self.detectionStrategy+' with Individual Memory')
                 cv2.destroyWindow(self.detectionStrategy+' with Individual Memory (Corrected)')
                 self.memory_evolution_video.release()
-                new_path = self.savePath+'participantsMemory/'+self.detectionStrategy+'_'+str(self.camera.day)+'_'+str(self.camera.cam)+'_'
-                new_path += str(self.frameIdList[0])+'_'+str(self.frameIdList[-1])+'_'+('%.2f' % self.dt)+'.avi'
-                os.rename(self.savePath+'participantsMemory/tmp.avi', new_path)
+                path = self.savePath+'participantsMemory/strategie='+self.detectionStrategy+'_day='+str(self.camera.day)+'_cam='+str(self.camera.cam)
+                path += '_frame_start='+str(self.frameIdList[0])+'_frame_end='+str(self.frameIdList[-1])+'_dt='+('%.2f' % self.dt)
+                if not os.path.exists(path):
+                    os.mkdir(path)
+                    os.rename(self.savePath+'participantsMemory/tmp.avi', path+'/memory_evolution.avi')
+                    graphiques = {}
+                    for memory, frameId in zip(self.memory_evolution, self.frameIdList):
+                        for id1 in memory.keys():
+                            # Creation du graphique pour le participant 'id1' 
+                            if id1 not in graphiques:
+                                graphiques[id1] = {}
+                                for id2 in memory[id1].keys():
+                                    graphiques[id1][id2] = ([memory[id1][id2]], [frameId])
+                            else:
+                                for id2 in memory[id1].keys():
+                                    # Si la courbe 'id2' n'est pas dans le graphique pour le participant 'id1', on l'ajoute
+                                    if id2 not in graphiques[id1]:
+                                        graphiques[id1][id2] = ([memory[id1][id2]], [frameId])
+                                    # Sinon on ajoute des points a la courbe 'id2' pour le graphique 'id1'
+                                    else:
+                                        graphiques[id1][id2][0].append(memory[id1][id2])
+                                        graphiques[id1][id2][1].append(frameId)
+                    for id1 in graphiques.keys():
+                        save_memory_evolution(graphiques, id1, self.frameIdList, path+'/memory_'+str(id1))
                 self.__initParams()
                 return True
             return False
@@ -227,17 +253,7 @@ class ParticipantsMemory(object):
     def __show_memory(self):
         """
         """
-        index = ['%d' % id for id in self.participantsID.tolist()]
-        columns = ['%d' % id for id in self.participantsID.tolist()]
-        df = pd.DataFrame(self.memory_array, index=index, columns=columns)
-        svm = sns.heatmap(df, annot=True, fmt=".2f", vmin=0, vmax=1, cmap='inferno')
-        plt.title("Participants memory", fontsize=fontsize/1.34)
-        plt.xlabel("Participants")
-        plt.ylabel("Participants")
-        fig = svm.get_figure()
-        fig.tight_layout()
-        img = fig2img(fig)
-        plt.close(fig)
+        img = plot_heatmap_memory(self.memory_array, self.participantsID)
         cv2.imshow('Participants Memory', img)
         if img.shape[0] == 550 and img.shape[1] == 800:
             tmp = img

@@ -173,10 +173,6 @@ def plot_clustering(nbRows, nbColumns, d, positions, DATA, labels):
     img = fig2img(fig)
     return img
 
-##################
-# Autres figures #
-##################
-
 def plot_f_formation(nbRows, nbColumns, participantsID, positions, f_formation):
     """
     Pour l'affichage de F-formations et de la position des individus de la scene.
@@ -234,6 +230,10 @@ def plot_f_formation(nbRows, nbColumns, participantsID, positions, f_formation):
     fig.tight_layout()
     img = fig2img(fig)
     return img
+
+########################################################################
+# Figures pour l'evaluation d'une methode de detection de F-formations #
+########################################################################
 
 def save_ARI_curve(ARI_list, frameIdList, title, filename):
     """
@@ -308,3 +308,55 @@ def save_heatmap3D(heatmap, x_range, y_range, z_range, heat_label, x_label, y_la
     df = pd.DataFrame(df, index=list(range(x_range.size*y_range.size*z_range.size)), columns=[heat_label, x_label, y_label, z_label])
     fig = px.scatter_3d(df, x=x_label, y=y_label, z=z_label, color=heat_label, color_continuous_scale=px.colors.sequential.Magma, title=title)
     fig.write_html(filename+'.html')
+
+########################################################
+# Figures pour la memoire des participants d'une scene #
+########################################################
+
+def plot_heatmap_memory(heatmap, rows_and_columns):
+    """
+    Pour l'affichage d'une heatmap.
+
+    Parameters
+    ----------
+    heatmap          : float [n_p, n_p] array,
+    rows_and_columns : int [n_p] array,
+
+    Return
+    ------
+    img : int [h, w, 3] array,
+    """
+    index = ['%d' % rc for rc in rows_and_columns.tolist()]
+    columns = ['%d' % rc for rc in rows_and_columns.tolist()]
+    df = pd.DataFrame(heatmap, index=index, columns=columns)
+    svm = sns.heatmap(df, annot=True, fmt=".2f", vmin=0, vmax=1, cmap='inferno')
+    plt.title("Participants memory")
+    plt.xlabel("Participants")
+    plt.ylabel("Participants")
+    fig = svm.get_figure()
+    fig.tight_layout()
+    img = fig2img(fig)
+    return img
+
+def save_memory_evolution(graphiques, id1, frameIdList, filename, shift=0.01):
+    fig = plt.figure()
+    ax = fig.gca()
+    ax.set_xlim([frameIdList[0], frameIdList[-1]])
+    ax.set_ylim([-0.1, 1.1])
+    graphique = graphiques[id1]
+    colorPalette = getColorPalette(len(graphique))
+    curves = []
+    for i, id2 in enumerate(graphique.keys()):
+        x = graphique[id2][1]
+        y = graphique[id2][0]
+        v = shift*((i+1)//2)*(-1)**i
+        y = (np.array(y)+v).tolist()
+        tmp, = plt.plot(x, y, color=colorPalette[i])
+        curves.append(tmp)
+    plt.title('Mémoire du participant '+str(id1))
+    plt.xlabel('Frames')
+    plt.ylabel('Mémoire')
+    legend = ax.legend(curves, ['memory('+str(id1)+','+str(id2)+')' for id2 in graphique.keys()], bbox_to_anchor=(1.04,1), loc='upper left')
+    ax.add_artist(legend)
+    fig.savefig(filename+'.png', bbox_inches="tight", dpi=dpi)
+    plt.close(fig)
