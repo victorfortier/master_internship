@@ -311,7 +311,7 @@ while True:
 	# Mise a jour de la recherche de parametres
 	camera.ps.update(participantsID, f_formation_true, f_formation_pred)
 	# Mise a jour de la memoire des participants
-	camera.pm.update(participantsID, positions, f_formation_pred, strategiesActivated)
+	camera.pm.update(participantsID, positions, f_formation_true, f_formation_pred, strategiesActivated)
 
 cv2.destroyAllWindows()
 camera.capture.release()

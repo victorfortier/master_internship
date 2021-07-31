@@ -1,14 +1,11 @@
 import cv2
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import networkx as nx
 import os
 import numpy as np
 from networkx.algorithms.clique import enumerate_all_cliques
 from PIL import Image
-from Figures import plot_heatmap_memory, save_memory_evolution
+from sklearn.metrics.cluster import adjusted_rand_score
+from Figures import save_ARI_curve, plot_heatmap_memory, save_memory_evolution
 from Tools import show_f_formation, f_formationToLabels
 
 class ParticipantsMemory(object):
@@ -83,22 +80,26 @@ class ParticipantsMemory(object):
         self.groups_with_memory = None
         self.groups_with_memory_corrected = None
         self.memory_evolution = []
-        self.memory_evolution_video = None 
+        self.memory_evolution_video = None
+        self.ARI_list1 = []
+        self.ARI_list2 = []
+        self.labels_pred_t0 = []
     
-    def update(self, participantsID, positions, groups, strategiesActivated):
+    def update(self, participantsID, positions, groups_true, groups_pred, strategiesActivated):
         """
         Parameters
         ----------
         participantsID      : int [n_p] array,
         positions           : float [n_p, 2] array,
-        groups              : list[list[int]],
+        groups_true         : list[list[int]],
+        groups_pred         : list[list[int]],
         strategiesActivated : list[str],
 
         Return
         ------
         """
         # Aucun groupe predit : aucune methode de detection de F-formations est en cours de traitement.
-        if groups is None:
+        if groups_pred is None:
             if self.camera.pmActivated:
                 # Les participants ne peuvent pas memoriser les membres de leurs groupes si aucune F-formation n'est predite.
                 if self.cpt == 0:
@@ -109,7 +110,7 @@ class ParticipantsMemory(object):
                 else:
                     print('Participants Memory cannot continue. No more predict F-formation.')
                     self.camera.pmActivated = False
-                    return self.update(participantsID, positions, [], [])
+                    return self.update(participantsID, positions, groups_true, [], [])
             return False
         if self.camera.pmActivated:
             if self.cpt == 0:
@@ -131,11 +132,11 @@ class ParticipantsMemory(object):
                 if len(strategiesActivated) != 1:
                     print('Participants Memory cannot continue. More than one detection strategy is used.')
                     self.camera.pmActivated = False
-                    return self.update(participantsID, positions, [], [self.detectionStrategy])
+                    return self.update(participantsID, positions, groups_true, [], [self.detectionStrategy])
                 if len(strategiesActivated) == 1 and strategiesActivated[0] != self.detectionStrategy:
                     print('Participants Memory cannot continue. The detection strategy changed.')
                     self.camera.pmActivated = False
-                    return self.update(participantsID, positions, [], [self.detectionStrategy])
+                    return self.update(participantsID, positions, groups_true, [], [self.detectionStrategy])
                 # Suppression de la memoire des participants qui ont quittes la scene
                 old_participants = list(set(self.participantsID.tolist()).difference(set(participantsID.tolist())))
                 if len(old_participants) != 0:
@@ -157,7 +158,7 @@ class ParticipantsMemory(object):
                                 self.memory[id1][id] = self.memory_threshold
             # Mise a jour de la memoire de chaque participants
             self.participantsID = participantsID
-            labels = f_formationToLabels(groups, self.participantsID)
+            labels = f_formationToLabels(groups_pred, self.participantsID)
             for id1 in self.memory.keys():
                 g_i = labels[np.argwhere(self.participantsID == id1)]
                 for id2 in self.memory[id1].keys():
@@ -178,6 +179,17 @@ class ParticipantsMemory(object):
             self.__computeGroupsWithMemory()
             cv2.imshow(self.detectionStrategy+' with Individual Memory', show_f_formation(self.groups_with_memory, self.participantsID, positions, self.camera.frame, (0, 127, 255)))
             cv2.imshow(self.detectionStrategy+' with Individual Memory (Corrected)', show_f_formation(self.groups_with_memory_corrected, self.participantsID, positions, self.camera.frame, (158, 108, 253)))
+            # Mesure de similarite
+            labels_true = f_formationToLabels(groups_true, self.participantsID)
+            labels_pred_t1 = f_formationToLabels(self.groups_with_memory_corrected, self.participantsID)
+            self.ARI_list1.append(adjusted_rand_score(labels_true, labels_pred_t1))
+            if len(self.frameIdList) > 0:
+                if len(self.labels_pred_t0) == len(labels_pred_t1):
+                    self.ARI_list2.append(adjusted_rand_score(self.labels_pred_t0, labels_pred_t1))
+                else:
+                    self.ARI_list2.append(-1)
+            self.labels_pred_t0 = labels_pred_t1
+            # Copie du dico (pour en garder une trace afin de tracer les courbes de memoires a la fin)
             memory_copy = {}
             for id1 in self.memory.keys():
                 memory_id1_copy = {}
@@ -200,7 +212,9 @@ class ParticipantsMemory(object):
                 path += '_frame_start='+str(self.frameIdList[0])+'_frame_end='+str(self.frameIdList[-1])+'_dt='+('%.2f' % self.dt)
                 if not os.path.exists(path):
                     os.mkdir(path)
+                    #
                     os.rename(self.savePath+'participantsMemory/tmp.avi', path+'/memory_evolution.avi')
+                    #
                     graphiques = {}
                     for memory, frameId in zip(self.memory_evolution, self.frameIdList):
                         for id1 in memory.keys():
@@ -220,6 +234,13 @@ class ParticipantsMemory(object):
                                         graphiques[id1][id2][1].append(frameId)
                     for id1 in graphiques.keys():
                         save_memory_evolution(graphiques, id1, self.frameIdList, path+'/memory_'+str(id1))
+                    #
+                    save_ARI_curve(self.ARI_list1, self.frameIdList, 
+                                   title="Mesure de similarité entre la F-formation détectée et la vérité terrain pour le jour n°"
+                                          +str(self.camera.day)+" et la caméra n°"+str(self.camera.cam), filename=path+'/ARI(truth,pred)')
+                    save_ARI_curve(self.ARI_list2, self.frameIdList[:-1], 
+                                   title="Mesure de similarité entre la F-formation détectée au temps t et celle détectée au temps t+1 pour le jour n°"
+                                          +str(self.camera.day)+" et la caméra n°"+str(self.camera.cam), filename=path+'/ARI(t,t+1)')
                 self.__initParams()
                 return True
             return False
