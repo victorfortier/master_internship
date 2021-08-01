@@ -232,8 +232,72 @@ class ParticipantsMemory(object):
                                     else:
                                         graphiques[id1][id2][0].append(memory[id1][id2])
                                         graphiques[id1][id2][1].append(frameId)
+                    shift = 0.01
                     for id1 in graphiques.keys():
-                        save_memory_evolution(graphiques, id1, self.frameIdList, path+'/memory_'+str(id1))
+                        Y = []
+                        for id2 in graphiques[id1].keys():
+                            x = graphiques[id1][id2][1]
+                            y = graphiques[id1][id2][0]
+                            tmp = np.full((len(self.frameIdList),), np.nan)
+                            for i, frameId in enumerate(self.frameIdList):
+                                j = np.argwhere(np.array(x) == frameId)
+                                if len(j) == 1:
+                                    tmp[i] = y[j[0][0]]
+                            Y.append(tmp.tolist())
+                        Y = np.array(Y).astype(np.float32)
+                        for j in range(Y.shape[1]):
+                            frameId = self.frameIdList[j]
+                            close_curves_pairwise = np.zeros((Y.shape[0], Y.shape[0]), dtype=int)
+                            for i1 in range(Y.shape[0]):
+                                if not np.isnan(Y[i1,j]):
+                                    for i2 in range(i1, Y.shape[0]):
+                                        if not np.isnan(Y[i2,j]):
+                                            if i1 != i2:
+                                                if abs(Y[i1,j]-Y[i2,j]) <= shift:
+                                                    close_curves_pairwise[i1,i2] = 1
+                            cliques = list(enumerate_all_cliques(nx.from_numpy_array(close_curves_pairwise)))
+                            close_curves = []
+                            for k1, clq1 in enumerate(cliques):
+                                add_clq = True
+                                for k2, clq2 in enumerate(cliques):
+                                    if k1 != k2:
+                                        if set(clq1).issubset(set(clq2)):
+                                            add_clq = False
+                                            break
+                                if add_clq:
+                                    close_curves.append(clq1)
+                            for curves in close_curves:
+                                tmp1 = list(zip(curves, Y[np.array(curves),j].tolist()))
+                                tmp1.sort(key=lambda x:x[1])
+                                tmp2 = []
+                                for ki in range(len(tmp1)):
+                                    tmp2.append(tmp1[((ki+1)//2)*(-1)**ki + len(tmp1)//2])
+                                di = [-2 for _ in range(len(tmp2))]
+                                if len(di) > 0:
+                                    di[0] = 0
+                                if len(di) > 1:
+                                    di[1] = -1
+                                for ki in range(1,len(tmp2)):
+                                    dy = abs(tmp2[ki+di[ki]][1]-tmp2[ki][1])
+                                    if (-1)**ki == 1:
+                                        if tmp2[ki][1] >= tmp2[ki+di[ki]][1]:
+                                            tmp2[ki] = (tmp2[ki][0], tmp2[ki][1]+(shift-dy)*(-1)**ki)
+                                        else:
+                                            tmp2[ki] = (tmp2[ki][0], tmp2[ki][1]+(shift+dy)*(-1)**ki)
+                                    else:
+                                        if tmp2[ki][1] <= tmp2[ki+di[ki]][1]:
+                                            tmp2[ki] = (tmp2[ki][0], tmp2[ki][1]+(shift-dy)*(-1)**ki)
+                                        else:
+                                            tmp2[ki] = (tmp2[ki][0], tmp2[ki][1]+(shift+dy)*(-1)**ki)
+                                for ki in range(len(tmp2)):
+                                    Y[tmp2[ki][0],j] = tmp2[ki][1]
+                        x = np.array(self.frameIdList)
+                        for k, id2 in enumerate(graphiques[id1].keys()):
+                            y = Y[k,:]
+                            index = np.argwhere(~np.isnan(y)).flatten()
+                            graphiques[id1][id2] = (y[index].tolist(), x[index].tolist())
+                        graphiques[id1] = dict(sorted(graphiques[id1].items()))
+                        save_memory_evolution(graphiques, id1, self.frameIdList, path+'/memory_'+str(id1), shift=0)
                     #
                     save_ARI_curve(self.ARI_list1, self.frameIdList, 
                                    title="Mesure de similarité entre la F-formation détectée et la vérité terrain pour le jour n°"
@@ -287,10 +351,7 @@ class ParticipantsMemory(object):
         """
         #
         pairwise_interaction = self.memory_array >= self.memory_threshold
-        tmp = enumerate_all_cliques(nx.from_numpy_array(pairwise_interaction))
-        cliques = []
-        for clq in tmp:
-            cliques.append(clq)
+        cliques = list(enumerate_all_cliques(nx.from_numpy_array(pairwise_interaction)))
         #
         self.groups_with_memory = []
         for i, clq1 in enumerate(cliques):
