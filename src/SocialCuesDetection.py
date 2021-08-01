@@ -14,11 +14,11 @@ class HumanDetector(object):
 
 	Attributes
 	----------
-	camera         : Camera,
-	savePath       : str,
-	tol            : float,
-	humanDetector  : HOGDescriptor,
-	boundingBoxes  : float [n_p, 4] array (rappel : n_p = nombre de participants dans une scene),
+	camera        : Camera,
+	savePath      : str,
+	tol           : float,
+	humanDetector : HOGDescriptor,
+	boundingBoxes : float [n_p, 4] array (rappel : n_p = nombre de participants dans une scene),
 
 	Methods
 	-------

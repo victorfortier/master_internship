@@ -11,14 +11,14 @@ class EvaluationMode(object):
 
     Attributes
     ----------
-    camera   : Camera,
-    savePath : str,
+    camera            : Camera,
+    savePath          : str,
     detectionStrategy : str,
-    frameIdList : list[int],
-    ARI_list1 : list[float],
-    ARI_list2 : list[float],
-    labels_pred_t0 : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-    logs : dict{key: str, value: int | float | list[Tuple[int, float]]},
+    frameIdList       : list[int],
+    ARI_list1         : list[float],
+    ARI_list2         : list[float],
+    labels_pred_t0    : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
+    logs              : dict{key: str, value: int | float | list[Tuple[int, float]]},
 
     Method
     ------

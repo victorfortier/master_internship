@@ -16,9 +16,9 @@ class Camera(object):
     FPS                 : int,
     FPS_MS              : int,
     window_name         : str,
-    frameId             : int
-    frameStep           : int
-    numberOfFrame       : int
+    frameId             : int,
+    frameStep           : int,
+    numberOfFrame       : int,
     frameChanged        : bool,
     frameCannotChanged  : bool,
     frame_trackbar      : str,
@@ -175,7 +175,7 @@ class Camera(object):
                     self.frameCannotChanged = True
                     if self.emActivated:
                         self.frameStep = 20
-                    if self.pmActivated:
+                    elif self.pmActivated:
                         self.frameStep = int(self.FPS * self.pm.dt)
                     else:
                         self.frameStep = 1

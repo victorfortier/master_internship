@@ -29,6 +29,10 @@ class ParticipantsMemory(object):
     groups_with_memory_corrected : list[list[int]],
     memory_evolution             : list[dict{key: int, value: dict{key: int, value: float}}],
     memory_evolution_video       : VideoWriter,
+    frameIdList                  : list[int],
+    ARI_list1                    : list[float],
+    ARI_list2                    : list[float],
+    labels_pred_t0               : int [n_p] array,
 
     Methods
     -------
@@ -73,7 +77,6 @@ class ParticipantsMemory(object):
         """
         self.cpt = 0
         self.detectionStrategy = None
-        self.frameIdList = []
         self.participantsID = None
         self.memory = None
         self.memory_array = None
@@ -81,6 +84,7 @@ class ParticipantsMemory(object):
         self.groups_with_memory_corrected = None
         self.memory_evolution = []
         self.memory_evolution_video = None
+        self.frameIdList = []
         self.ARI_list1 = []
         self.ARI_list2 = []
         self.labels_pred_t0 = []
@@ -94,9 +98,6 @@ class ParticipantsMemory(object):
         groups_true         : list[list[int]],
         groups_pred         : list[list[int]],
         strategiesActivated : list[str],
-
-        Return
-        ------
         """
         # Aucun groupe predit : aucune methode de detection de F-formations est en cours de traitement.
         if groups_pred is None:
@@ -105,19 +106,19 @@ class ParticipantsMemory(object):
                 if self.cpt == 0:
                     print('Participants Memory cannot start. No predict F-formation to process.')
                     self.camera.pmActivated = False
-                    return False
+                    return
                 # Les participants ne peuvent plus mémoriser les membres de leurs groupes si plus aucune F-formation n'est predite.
                 else:
                     print('Participants Memory cannot continue. No more predict F-formation.')
                     self.camera.pmActivated = False
                     return self.update(participantsID, positions, groups_true, [], [])
-            return False
+            return
         if self.camera.pmActivated:
             if self.cpt == 0:
                 if len(strategiesActivated) != 1:
                     print('Participants Memory cannot start. More than one detection strategy is used.')
                     self.camera.pmActivated = False
-                    return False
+                    return
                 self.detectionStrategy = strategiesActivated[0]
                 self.participantsID = participantsID
                 self.memory = {}
@@ -132,11 +133,11 @@ class ParticipantsMemory(object):
                 if len(strategiesActivated) != 1:
                     print('Participants Memory cannot continue. More than one detection strategy is used.')
                     self.camera.pmActivated = False
-                    return self.update(participantsID, positions, groups_true, [], [self.detectionStrategy])
+                    self.update(participantsID, positions, groups_true, [], [self.detectionStrategy])
                 if len(strategiesActivated) == 1 and strategiesActivated[0] != self.detectionStrategy:
                     print('Participants Memory cannot continue. The detection strategy changed.')
                     self.camera.pmActivated = False
-                    return self.update(participantsID, positions, groups_true, [], [self.detectionStrategy])
+                    self.update(participantsID, positions, groups_true, [], [self.detectionStrategy])
                 # Suppression de la memoire des participants qui ont quittes la scene
                 old_participants = list(set(self.participantsID.tolist()).difference(set(participantsID.tolist())))
                 if len(old_participants) != 0:
@@ -199,7 +200,7 @@ class ParticipantsMemory(object):
             self.memory_evolution.append(memory_copy)
             self.frameIdList.append(self.camera.frameId)
             self.cpt += 1
-            return False
+            return
         else:
             # La memoire des participants vient juste d'etre stoppee par l'utilisateur. Il ne reste plus qu'a sauvegarder les resultats.
             if self.cpt > 0:
@@ -306,8 +307,8 @@ class ParticipantsMemory(object):
                                    title="Mesure de similarité entre la F-formation détectée au temps t et celle détectée au temps t+1 pour le jour n°"
                                           +str(self.camera.day)+" et la caméra n°"+str(self.camera.cam), filename=path+'/ARI(t,t+1)')
                 self.__initParams()
-                return True
-            return False
+                return
+            return
 
     def __learning(self, m):
         """
