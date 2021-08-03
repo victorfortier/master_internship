@@ -393,15 +393,17 @@ def fig2img(fig):
 	plt.close(fig)
 	return img
 
-def getColorPalette(nb_colors):
+def getColorPalette(nb_colors, palette1='Set1', palette2='Set3'):
 	"""
-	Retourne une palette de couleur construite a partir des palettes 'Set1' et 'Set3' de matplotlib et contenant le nombre de couleurs voulu.
-	Si le nombre de couleurs voulu est superieur au nombre de couleurs maximal des palettes 'Set1' et 'Set3',
+	Retourne une palette de couleur construite a partir de deux palettes (par defaut 'Set1' et 'Set3') de matplotlib et contenant le nombre de couleurs voulu.
+	Si le nombre de couleurs voulu est superieur au nombre de couleurs maximal des deux palettes,
 	les couleurs restantes sont tirees aleatoirement dans l'espace RGBA (entre 0 et 1 pour RGB, la couleur de transparence etant fixee a 1).
 
 	Parameter
 	---------
 	nb_colors : int,
+	palette1  : str (optional),
+	palette2  : str (optional),
 
 	Return
 	------
@@ -409,8 +411,8 @@ def getColorPalette(nb_colors):
 	"""
 	if nb_colors < 0:
 		return []
-	cmap1 = cm.get_cmap(name='Set1')
-	cmap2 = cm.get_cmap(name='Set3')
+	cmap1 = cm.get_cmap(name=palette1)
+	cmap2 = cm.get_cmap(name=palette2)
 	colorPalette = []
 	for i in range(cmap1.N):
 		colorPalette.append(cmap1(i))

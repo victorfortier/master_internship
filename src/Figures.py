@@ -338,25 +338,42 @@ def plot_heatmap_memory(heatmap, rows_and_columns):
     img = fig2img(fig)
     return img
 
-def save_memory_evolution(graphiques, id1, frameIdList, filename, shift=0.01):
-    fig = plt.figure()
-    ax = fig.gca()
-    ax.set_xlim([frameIdList[0], frameIdList[-1]])
-    ax.set_ylim([-0.1, 1.1])
+def save_memory_evolution(graphiques, id1, frameIdList, frameStep, filename):
+    """
+    Parameters
+    ----------
+    graphiques  : dict{key: int, value: dict{key: int, value: Tuple[list[float], list[int]]}},
+    id1         : int,
+    frameIdList : list[int]
+    frameStep   : int,
+    filename    : str,
+    """
     graphique = graphiques[id1]
-    colorPalette = getColorPalette(len(graphique))
-    curves = []
+    nbX, nbY = int(np.ceil(len(graphique)/3)), 3
+    fig, axes = plt.subplots(nbX, nbY, figsize=(300*nbX/dpi, 250*nbY/dpi), sharex=True, sharey=True, constrained_layout=True)
+    plt.setp(axes, xlim=(frameIdList[0], frameIdList[-1]), ylim=(-0.1, 1.1))
+    colorPalette = getColorPalette(len(graphique), palette2='Dark2')
     for i, id2 in enumerate(graphique.keys()):
         x = graphique[id2][1]
         y = graphique[id2][0]
-        v = shift*((i+1)//2)*(-1)**i
-        y = (np.array(y)+v).tolist()
-        tmp, = plt.plot(x, y, color=colorPalette[i])
-        curves.append(tmp)
-    plt.title('Mémoire du participant '+str(id1))
-    plt.xlabel('Frames')
-    plt.ylabel('Mémoire')
-    legend = ax.legend(curves, ['memory('+str(id1)+','+str(id2)+')' for id2 in graphique.keys()], bbox_to_anchor=(1.04,1), loc='upper left')
-    ax.add_artist(legend)
-    fig.savefig(filename+'.png', bbox_inches="tight", dpi=dpi)
+        x_tmp = [[x[0]]]
+        y_tmp = [[y[0]]]
+        if len(x) > 1:
+            for j in range(1, len(x)):
+                if x_tmp[-1][-1] == x[j]-frameStep:
+                    x_tmp[-1].append(x[j])
+                    y_tmp[-1].append(y[j])
+                else:
+                    x_tmp.append([x[j]])
+                    y_tmp.append([y[j]])
+        for (X,Y) in zip(x_tmp, y_tmp):
+            if len(X) == 1:
+                axes[(nbX-1)-i//nbY, i%nbY].plot(X[0], Y[0], color=colorPalette[i])
+            else:
+                axes[(nbX-1)-i//nbY, i%nbY].plot(X, Y, color=colorPalette[i])
+            axes[(nbX-1)-i//nbY, i%nbY].set_title('memory('+str(id1)+','+str(id2)+')', fontsize=fontsize/1.34)
+    fig.suptitle('Mémoire du participant '+str(id1))
+    plt.setp(axes[-1, :], xlabel='Frames (time)')
+    plt.setp(axes[:, 0], ylabel='Mémoire')
+    fig.savefig(filename+'.png', dpi=dpi)
     plt.close(fig)
