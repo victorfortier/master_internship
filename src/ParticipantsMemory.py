@@ -33,6 +33,7 @@ class ParticipantsMemory(object):
     ARI_list1                    : list[float],
     ARI_list2                    : list[float],
     labels_pred_t0               : int [n_p] array,
+    logs                         : dict{key: str, value: int | float | list[Tuple[int, float]]},
 
     Methods
     -------
@@ -88,6 +89,14 @@ class ParticipantsMemory(object):
         self.ARI_list1 = []
         self.ARI_list2 = []
         self.labels_pred_t0 = []
+        self.logs = {
+            'frame_start': 0,
+            'frame_end': 0,
+            'evaluation_coeff': 0.0,
+            'stability_coeff': 0.0,
+            'worst_evaluations': [],
+            'greatest_instabilities': [],
+	    }
     
     def update(self, participantsID, positions, groups_true, groups_pred, strategiesActivated):
         """
@@ -237,6 +246,26 @@ class ParticipantsMemory(object):
                         graphiques[id1] = dict(sorted(graphiques[id1].items()))
                         save_memory_evolution(graphiques, id1, self.frameIdList, self.camera.frameStep, path+'/memory_'+str(id1))
                     #
+                    self.logs['frame_start'] = self.frameIdList[0]
+                    self.logs['frame_end'] = self.frameIdList[-1]
+                    self.logs['evaluation_coeff'] = np.mean(np.array(self.ARI_list1))
+                    self.logs['stability_coeff'] = np.mean(np.array(self.ARI_list2))
+                    if len(self.frameIdList) >= 20:
+                        sortByWorstEvaluation = list(zip(self.frameIdList, self.ARI_list1))
+                        sortByWorstEvaluation.sort(key=lambda x: x[1])
+                        self.logs['worst_evaluations'] = sortByWorstEvaluation[:10]
+                        sortByGreatestInstabilities = list(zip(self.frameIdList, self.ARI_list2))
+                        sortByGreatestInstabilities.sort(key=lambda x: x[1])
+                        self.logs['greatest_instabilities'] = sortByGreatestInstabilities[:10]
+                    f = open(path+"/logs.txt", 'w')
+                    f.write("frame_start = "+str(self.logs['frame_start']))
+                    f.write("\nframe_end = "+str(self.logs['frame_end']))
+                    f.write("\nevaluation_coeff = "+str(self.logs['evaluation_coeff']))
+                    f.write("\nstability_coeff = "+str(self.logs['stability_coeff']))
+                    if self.logs['worst_evaluations'] != []:
+                        f.write("\nworst_evaluations = "+str(self.logs['worst_evaluations']))
+                    if self.logs['greatest_instabilities'] != []:
+                        f.write("\ngreatest_instabilities = "+str(self.logs['greatest_instabilities']))
                     save_ARI_curve(self.ARI_list1, self.frameIdList, 
                                    title="Mesure de similarité entre la F-formation détectée et la vérité terrain pour le jour n°"
                                           +str(self.camera.day)+" et la caméra n°"+str(self.camera.cam), filename=path+'/ARI(truth,pred)')
