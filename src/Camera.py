@@ -81,7 +81,7 @@ class Camera(object):
         self.frame_trackbar = 'Frame'
         cv2.createTrackbar(self.frame_trackbar, self.window_name, 0, self.numberOfFrame-1, self.__change_frameId)
         cv2.setTrackbarPos(self.frame_trackbar, self.window_name, self.frameId)
-        # Initialise (pointeur null pour le moment) les objets EM, PS & HD
+        # Initialise (pointeur null pour le moment) les objets EM, PS, HD et PM
         self.em = None
         self.ps = None
         self.hd = None
@@ -182,7 +182,7 @@ class Camera(object):
                     self.frameId += self.frameStep
                     cv2.setTrackbarPos(self.frame_trackbar, self.window_name, self.frameId)
                     self.frameCannotChanged = False
-                    self.frameChanged = self.emActivated
+                    self.frameChanged = self.emActivated or self.pmActivated
                     return True
         return False
     

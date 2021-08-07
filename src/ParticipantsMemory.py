@@ -253,10 +253,10 @@ class ParticipantsMemory(object):
                     if len(self.frameIdList) >= 20:
                         sortByWorstEvaluation = list(zip(self.frameIdList, self.ARI_list1))
                         sortByWorstEvaluation.sort(key=lambda x: x[1])
-                        self.logs['worst_evaluations'] = sortByWorstEvaluation[:10]
+                        self.logs['worst_evaluations'] = sortByWorstEvaluation[:30]
                         sortByGreatestInstabilities = list(zip(self.frameIdList, self.ARI_list2))
                         sortByGreatestInstabilities.sort(key=lambda x: x[1])
-                        self.logs['greatest_instabilities'] = sortByGreatestInstabilities[:10]
+                        self.logs['greatest_instabilities'] = sortByGreatestInstabilities[:30]
                     f = open(path+"/logs.txt", 'w')
                     f.write("frame_start = "+str(self.logs['frame_start']))
                     f.write("\nframe_end = "+str(self.logs['frame_end']))
