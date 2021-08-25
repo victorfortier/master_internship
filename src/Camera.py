@@ -6,32 +6,33 @@ from ParticipantsMemory import ParticipantsMemory
 
 class Camera(object):
     """
-    La classe Camera permet de visualiser la video et d'interagir avec par les sliders ou par des touches du clavier.
+    La classe Camera permet de visualiser la video et d'interagir avec par des sliders ou par des touches du clavier afin d'y superposer des informations
+    sur les groupes (F-formations) et sur les individus eux memes (la position des boites englobantes, la direction du regard de chaque individu, etc).
 
     Attributes
     ----------
-    day                 : int,
-    cam                 : int,
-    capture             : VideoCapture,
-    FPS                 : int,
-    FPS_MS              : int,
-    window_name         : str,
-    frameId             : int,
-    frameStep           : int,
-    numberOfFrame       : int,
-    frameChanged        : bool,
-    frameCannotChanged  : bool,
-    frame_trackbar      : str,
-    em                  : EvaluationMode,
-    ps                  : ParameterSearching,
-    hd                  : HumanDetector,
-    pm                  : ParticipantsMemory,
-    pause               : bool,
-    quit                : bool,
-    emActivated         : bool,
-    psActivated         : bool,
-    savePositiveSamples : bool,
-    pmActivated         : bool,
+    day                 : int, le numero du jour (1, 2 ou 3)
+    cam                 : int, le numero de la camera (1, 2 ou 3)
+    capture             : VideoCapture, la capture
+    FPS                 : int, le nombre d'images par seconde de la video etudiee
+    FPS_MS              : int, le nombre de millisecondes entre chaque frame
+    window_name         : str, le nom de la fenetre ou la video s'affiche
+    frameId             : int, le numero de la frame courante
+    frameStep           : int, le pas de frames
+    numberOfFrame       : int, le nombre total de frames de la video
+    frameChanged        : bool, True si la frame est modifiee par l'utilisateur avec la barre de lecture de la video, False sinon
+    frameCannotChanged  : bool, True si la frame ne peut pas etre modifiee, False sinon
+    frame_trackbar      : str, le nom de la barre de lecture qui permet de controler la video
+    em                  : EvaluationMode, le mode "evaluation" rattache a la video
+    ps                  : ParameterSearching, la "recherche de parametres" rattachee a la video
+    hd                  : HumanDetector, le detecteur d'individus rattache a la video
+    pm                  : ParticipantsMemory, la memoire de chaque participants apparaissant sur la video
+    pause               : bool, True si l'utilisateur a mis en pause la video, False sinon
+    quit                : bool, True si l'utilisateur souhaite fermer la video, False sinon
+    emActivated         : bool, True si le mode "evaluation" est en cours de fonctionnement, False sinon
+    psActivated         : bool, True si la "recherche de parametres" est en cours de fonctionnement, False sinon
+    savePositiveSamples : bool, True si l'utilisateur souhaite enregistrer les individus contenus dans les boites englobantes, False sinon
+    pmActivated         : bool, True si la memoire de chaque participants est en cours de fonctionnement, False sinon
     
     Methods
     -------
@@ -50,13 +51,13 @@ class Camera(object):
         """
         Parameters
         ----------
-        day         : int,
-        cam         : int,
-        src         : str,
-        FPS         : int,
-        window_name : str,
-        frameId     : int (optional),
-        frameStep   : int (optional),
+        day         : int, le numero du jour (1, 2 ou 3)
+        cam         : int, le numero de la camera (1, 2 ou 3)
+        src         : str, le chemin correspondant a la video a etudiee
+        FPS         : int, le nombre d'images par seconde de la video etudiee
+        window_name : str, le nom de la fenetre ou la video s'affiche
+        frameId     : int (optional), le numero de la frame courante
+        frameStep   : int (optional), le pas de frames
         """
         # Initialise le jour et la camera de la video etudiee (du dataset MatchNMingle)
         self.day = day
@@ -103,8 +104,8 @@ class Camera(object):
 
         Parameters
         ----------
-        savePath    : str,
-        emActivated : bool (optional),
+        savePath    : str, le chemin correspondant au dossier ou les resultats du mode "evaluation" s'enregistrent
+        emActivated : bool (optional), True si le mode "evaluation" se met en route des son initialisation, False sinon
         """
         self.emActivated = emActivated
         self.em = EvaluationMode(self, savePath)
@@ -115,19 +116,19 @@ class Camera(object):
 
         Parameters
         ----------
-        savePath    : str,
-        frameStart  : int,
-        frameEnd    : int,
-        alphaMin    : float,
-        alphaMax    : float,
-        alphaStep   : float,
-        betaMin     : float,
-        betaMax     : float,
-        betaStep    : float,
-        gammaMin    : float,
-        gammaMax    : float,
-        gammaStep   : float,
-        psActivated : bool (optional),
+        savePath    : str, le chemin correspondant au dossier ou les resultats de la "recheche de parametres" s'enregistrent
+        frameStart  : int, la frame de depart pour la "recherche de parametres"
+        frameEnd    : int, la frame de fin pour la "recherche de parametres"
+        alphaMin    : float, valeur minimale pour le premier parametre de l'algorithme 3 de detection de F-formations
+        alphaMax    : float, valeur maximale pour le premier parametre de l'algorithme 3 de detection de F-formations
+        alphaStep   : float, valeur du pas pour le premier parametre de l'algorithme 3 de detection de F-formations
+        betaMin     : float, valeur minimale pour le deuxieme parametre de l'algorithme 3 de detection de F-formations
+        betaMax     : float, valeur maximale pour le deuxieme parametre de l'algorithme 3 de detection de F-formations
+        betaStep    : float, valeur du pas pour le deuxieme parametre de l'algorithme 3 de detection de F-formations
+        gammaMin    : float, valeur minimale pour le troisieme parametre de l'algorithme 3 de detection de F-formations
+        gammaMax    : float, valeur maximale pour le troisieme parametre de l'algorithme 3 de detection de F-formations
+        gammaStep   : float, valeur du pas pour le troisieme parametre de l'algorithme 3 de detection de F-formations
+        psActivated : bool (optional), True si la "recherche de parametre" se met en route des son initialisation, False sinon
         """
         self.psActivated = psActivated
         self.ps = ParameterSearching(self, savePath, frameStart, frameEnd, alphaMin, alphaMax, alphaStep, betaMin, betaMax, betaStep, gammaMin, gammaMax, gammaStep)
@@ -142,7 +143,7 @@ class Camera(object):
 
         Parameters
         ----------
-        savePath : str,
+        savePath : str, le chemin correspondant au dossier ou les resultats du detecteur d'humains s'enregistrent
         """
         self.hd = HumanDetector(self, savePath)
 
@@ -152,11 +153,11 @@ class Camera(object):
 
         Parameters
         ----------
-        savePath         : str,
-        dt               : float,
-        tau_learn        : float (optional),
-        tau_forget       : float (optional),
-        memory_threshold : float (optional),
+        savePath         : str, le chemin correspondant au dossier ou les resultats de la memoire de chaque participants a la scene s'enregistrent
+        dt               : float, parametre temporelle pour l'evolution de la memoire de chaque individu
+        tau_learn        : float (optional), parametre qui controle la vitesse d'apprentissage entre deux individus
+        tau_forget       : float (optional), parametre qui controle la vitesse d'oubli entre deux individus
+        memory_threshold : float (optional), parametre qui controle le seuil de la memoire au dessus duquel deux individus sont consideres en interaction
         """
         self.pm = ParticipantsMemory(self, savePath, dt, tau_learn=tau_learn, tau_forget=tau_forget, memory_threshold=memory_threshold)
 
@@ -199,9 +200,9 @@ class Camera(object):
 
         Parameters
         ----------
-        name_trackbar     : str,
-        callback_function : function,
-        initial_state     : bool,
+        name_trackbar     : str, le nom de la fenetre ou la video s'affiche
+        callback_function : function, le nom de la fonction qui est appellee lorsque le slider est manipule par l'utilisateur
+        initial_state     : bool, l'etat initial du slider (0 ou 1)
         """
         cv2.createTrackbar(name_trackbar, self.window_name, 0, 1, callback_function)
         cv2.setTrackbarPos(name_trackbar, self.window_name, 1 if initial_state else 0)
@@ -212,7 +213,7 @@ class Camera(object):
 
         Parameter
         ---------
-        value : int,
+        value : int, 
         """
         if not self.frameCannotChanged:
             self.frameId = value
@@ -224,7 +225,7 @@ class Camera(object):
 
         Parameter
         ---------
-        delay : float,
+        delay : float, le nombre de millisecondes entre chaque frames (par defaut FPS_MS, sinon 0 lorsque la video est en pause)
         """
         key = cv2.waitKey(delay) & 0xff
         if key == ord('q'):

@@ -6,19 +6,21 @@ from Tools import f_formationToLabels
 
 class EvaluationMode(object):
     """
-    La classe EvaluationMode permet d'evaluer un certain algoritme de detection de F-formations (en terme de qualite des F-formations retournees
-    et de dynamiques des groupes detectes) pendant un sequence video selectionne par l'utilisateur.
+    La classe EvaluationMode permet d'evaluer un certain algorithme de detection de F-formations (en terme de qualite des F-formations retournees
+    et de dynamiques des groupes detectes) dans un sequence video selectionne par l'utilisateur.
 
     Attributes
     ----------
-    camera            : Camera,
-    savePath          : str,
-    detectionStrategy : str,
-    frameIdList       : list[int],
-    ARI_list1         : list[float],
-    ARI_list2         : list[float],
-    labels_pred_t0    : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-    logs              : dict{key: str, value: int | float | list[Tuple[int, float]]},
+    camera            : Camera, la camera a laquelle le mode "evaluation" est rattachee
+    savePath          : str, le chemin correspondant au dossier ou les resultats du mode "evaluation" s'enregistrent
+    detectionStrategy : str, le nom de la methode de detection qui est evaluee
+    frameIdList       : list[int], la liste des numeros des frames qui ont ete evaluee
+    ARI_list1         : list[float], la liste correspondant au mesure de similarite entre les F-formations detectees et celles de la verite terrain
+                                     a chaque frame de la liste frameIdList
+    ARI_list2         : list[float], la liste correspondant au mesure de similarite entre les F-formations detectees au temps t et celles detectees
+                                     au temps t+1 a chaque frame t de la la liste frameIdList
+    labels_pred_t0    : int [n_p] array (rappel : n_p = nombre de participants dans une scene), le numero de label de chaque participant au temps t
+    logs              : dict{key: str, value: int | float | list[Tuple[int, float]]}, les logs correspondant a l'evaluation menee
 
     Method
     ------
@@ -30,8 +32,8 @@ class EvaluationMode(object):
         """
         Parameters
         ----------
-        camera   : Camera,
-        savePath : str,
+        camera   : Camera, la camera a laquelle le mode "evaluation" est rattachee
+        savePath : str, le chemin correspondant au dossier ou les resultats du mode "evaluation" s'enregistrent
         """
         self.camera = camera
         self.savePath = savePath
@@ -61,11 +63,13 @@ class EvaluationMode(object):
 
         Parameters
         ----------
-        participantsID      : int [n_p] array,
-        f_formation_true    : list[list[int]],
-        f_formation_pred    : list[list[int]],
-        strategiesActivated : list[str],
-        suffix              : str (optional),
+        participantsID      : int [n_p] array, le numero des participants a la scene
+        f_formation_true    : list[list[int]], les F-formations verites terrains
+        f_formation_pred    : list[list[int]], les F-formations detectees par l'algorithme evalue
+        strategiesActivated : list[str], la liste des noms des methodes de detections de F-formations qui sont actives.
+                                         Si une seule methode est activee et qu'elle correspond a celle qui est utilisee depuis le debut,
+                                         alors l'evaluation se poursuit, sinon elle s'arrete brusquement.
+        suffix              : str (optional), suffixe pour le dossier qui sera cree et qui contiendra les resultats des evaluations
 
         Return
         ------
