@@ -18,7 +18,7 @@ def getParameters():
 
 	Return
 	------
-	PARAMETERS : dict{key: str, value: str | int | float | bool},
+	PARAMETERS : dict{key: str, value: str | int | float | bool}, les parametres en question
 	"""
 	with open('PARAMETERS.txt', 'r') as reader:
 		lines = reader.readlines()
@@ -41,13 +41,13 @@ def getValue(dico, key, defaultValue):
 
 	Parameters
 	----------
-	dico         : dict{key: str, value: str | int | float | bool},
-	key          : str,
-	defaultValue : str | int | float | bool,
+	dico         : dict{key: str, value: str | int | float | bool}, dictionnaire
+	key          : str, la clef
+	defaultValue : str | int | float | bool, valeur par defaut retournee si la cle n'appartient pas au dictionnaire
 	
 	Return
 	------
-	value : str | int | float | bool,
+	value : str | int | float | bool, la valeur de la clef ou la valeur par defaut
 	"""
 	value = dico[key] if key in dico else defaultValue
 	return value
@@ -58,11 +58,11 @@ def openCSV(filename):
 
 	Parameters
 	----------
-	filename : str,
+	filename : str, le fichier en question
 
 	Return
 	------
-	arr : Any array,
+	arr : Any array, l'array encode dans le fichier CSV
 	"""
 	rows = []
 	with open(filename) as csvfile:
@@ -84,12 +84,12 @@ def timeToFrame(time, FPS):
 
 	Parameters
 	----------
-	time : str,
-	FPS  : int,
+	time : str, temps (chaine de caractere au format min:sec)
+	FPS  : int, nombre de frames par seconde de la video etudiee
 
 	Return
 	------
-	frame : int,
+	frame : int, le numero de la frame correspondante au temps indique
 	"""
 	t = time.split(":")
 	secondes = np.int64(t[0])*60 + np.int64(t[1])
@@ -106,15 +106,15 @@ def getManualAnnotations(frameId, participants, keypointsAndOrientations, data, 
 
 	Parameters
 	----------
-	frameId                  : int,
-	participants             : int [n_p_day, 2] array (rappel : n_p_day = nombre de participants au jour 'day'),
-	keypointsAndOrientations : float [numberOfFrames, n_p_all*13] array (rappel : n_p_all = nombre de participants aux soirees cocktail),
-	data                     : float [numberOfFrames, n_p_all*7] array,
-	labels                   : int [numberOfFrames, n_p_all*9] array,
+	frameId                  : int, le numero de la frame courante
+	participants             : int [n_p_day, 2] array (rappel : n_p_day = nombre de participants au jour 'day'), la liste des participants a la scene
+	keypointsAndOrientations : float [numberOfFrames, n_p_all*13] array (rappel : n_p_all = nombre de participants aux soirees cocktail), points cles et orientations de chaque individu et a chaque frame de la video
+	data                     : float [numberOfFrames, n_p_all*7] array, donnees (dont la position de la boite englobante) de chaque individu a chaque frame de la video
+	labels                   : int [numberOfFrames, n_p_all*9] array, labels (qui indique les gestes et les reactions des individus) de chaque individu a chaque frame de la video
 
 	Return
 	------
-	manual_annotations : list[list],
+	manual_annotations : list[list], les annotations principales de la base de donnee Mingle de la frame courante
 	"""
 	manual_annotations = []
 	for [globalId, _] in participants:
@@ -143,15 +143,15 @@ def getInfoForF_formationDetection(manual_annotations, participants, cam):
 
 	Parameters
 	----------
-	manual_annotations : list[list],
-	participants       : int [n_p_day, 2] array,
-	cam                : int,
+	manual_annotations : list[list], les annotations principales de la base de donnee Mingle de la frame courante
+	participants       : int [n_p_day, 2] array, la liste des participants a la scene
+	cam                : int, le numero de la camera de la video etudiee
 
 	Returns
 	-------
-	participantsID : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-	positions      : float [n_p, 2] array,
-	orientations   : float [n_p] array,
+	participantsID : int [n_p] array (rappel : n_p = nombre de participants dans une scene), la liste des numeros (dayId) des individus de la scene
+	positions      : float [n_p, 2] array, les positions des individus de la scene
+	orientations   : float [n_p] array, l'orientation de chaque individu de la scene
 	"""
 	participantsID = []
 	positions = []
@@ -182,13 +182,13 @@ def optimalClustering(DATA, numberOfParticipants):
 
 	Parameters
 	----------
-	DATA                 : int [n_data, 2] array,
-	numberOfParticipants : int,
+	DATA                 : int [n_data, 2] array, donnes 2D (positions) votees par chaque individu de la scene
+	numberOfParticipants : int, le nombre de participants a la scene
 	
 	Returns
 	-------
-	labels  : list[int] (de taille n_data),
-	centers : float [n_clusters, 2] array,
+	labels  : list[int] (de taille n_data), le label (le cluster) attribue a chaque donnee
+	centers : float [n_clusters, 2] array, les positions des centres de clusters
 	"""
 	lab = []
 	cen = []
@@ -231,12 +231,12 @@ def videoFormatToFrameFormatForF_formation(f_formation_video, numberOfFrame):
 
 	Parameters
 	----------
-	f_formation_video : list[list[int] (de taille 3)] (de taille le nombre de F-formations dans la sequence video),
-	numberOfFrame     : int,
+	f_formation_video : list[list[int] (de taille 3)] (de taille le nombre de F-formations dans la sequence video), F-formations au format video
+	numberOfFrame     : int, le nombre de frames dans la video
 
 	Return
 	------
-	f_formation       : list[list[list[int]] (de taille le nombre de F-formations dans la frame)] (de taille numberOfFrame),
+	f_formation       : list[list[list[int]] (de taille le nombre de F-formations dans la frame)] (de taille numberOfFrame), F-formation au format frame par frame
 
 	"""
 	f_formation = [[] for i in range(numberOfFrame)]
@@ -254,13 +254,14 @@ def f_formationCorrection(f_formation, participantsID, keep_only_one_occurence='
 
 	Parameters
 	----------
-	f_formation             : list[list[int]] (de taille le nombre de F-formations dans la scene),
-	participantsID          : int [n_p] array,
-	keep_only_one_occurence : str (optional),
+	f_formation             : list[list[int]] (de taille le nombre de F-formations dans la scene), les F-formations que l'on souhaite corriger
+							  la verite terrain normalement afin de s'assurer qu'elles soient en accord avec les F-formations detectees pour les comparer)
+	participantsID          : int [n_p] array, les numeros des participants a la scene
+	keep_only_one_occurence : str (optional), la methode de selection d'une unique F-formation si une personne en appartient de base a plusieurs
 
 	Return
 	------
-	f_formation_correction : list[list[int]] (de taille le bon nombre de F-formations dans la scene),
+	f_formation_correction : list[list[int]] (de taille le bon nombre de F-formations dans la scene), les F-formations corrigees
 
 	Raise
 	-----
@@ -325,15 +326,15 @@ def show_f_formation(f_formation, participantsID, positions, frame, color):
 
 	Parameters
 	----------
-	f_formation    : list[list[int]] (de taille le nombre de F-formations),
-	participantsID : int [n_p] array,
-	positions      : float [n_p, 2] array,
-	frame          : int [h, w, 3] array,
-	color          : Tuple[int*3],
+	f_formation    : list[list[int]] (de taille le nombre de F-formations), les F-formations que l'on souhaite superposer a la video
+	participantsID : int [n_p] array, les numeros des participants a la scene
+	positions      : float [n_p, 2] array, les positions des participants a la scene
+	frame          : int [h, w, 3] array, la frame sur laquelle les F-formations seront dessinnees
+	color          : Tuple[int*3], la couleur des F-formations
 
 	Return
 	------
-	image : int [h, w, 3] array,
+	image : int [h, w, 3] array, frame de depart a laquelle les F-formations y sont dessinnees a la bonne couleur
 	"""
 	image = frame.copy()
 	for k in range(len(f_formation)):
@@ -356,12 +357,12 @@ def f_formationToLabels(f_formation, participantsID):
 
 	Parameters
 	----------
-	f_formation : list[list[int]],
-	participantsID : int [n_p] array,
+	f_formation : list[list[int]], les F-formations
+	participantsID : int [n_p] array, les numeros des participants a la scene
 
 	Return
 	------
-	labels : int [n_p] array,
+	labels : int [n_p] array, le numero de F-formation de chaque participant
 	"""
 	labels = np.zeros_like(participantsID)
 	for i in range(len(f_formation)):
@@ -380,11 +381,11 @@ def fig2img(fig):
 
 	Parameter
 	---------
-	fig : Figure,
+	fig : Figure, une figure matplotlib
 
 	Return
 	------
-	img : [h, w, 3] array,
+	img : [h, w, 3] array, l'image de la figure matplotlib
 	"""
 	fig.canvas.draw()
 	img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
@@ -401,13 +402,13 @@ def getColorPalette(nb_colors, palette1='Set1', palette2='Set3'):
 
 	Parameter
 	---------
-	nb_colors : int,
-	palette1  : str (optional),
-	palette2  : str (optional),
+	nb_colors : int, le nombres de couleurs a retourner
+	palette1  : str (optional), le nom de la premiere palette de couleurs a utiliser
+	palette2  : str (optional), le nom de la seconde palette de couleurs a utiliser
 
 	Return
 	------
-	colorPalette : list[Tuple[float**4]],
+	colorPalette : list[Tuple[float**4]], la palettte de couleurs
 	"""
 	if nb_colors < 0:
 		return []

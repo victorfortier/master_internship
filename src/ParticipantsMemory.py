@@ -14,26 +14,28 @@ class ParticipantsMemory(object):
     
     Attributes
     ----------
-    camera                       : Camera,
-    savePath                     : str,
-    dt                           : float,
-    tau_learn                    : float,
-    tau_forget                   : float,
-    memory_threshold             : float,
-    cpt                          : int,
-    detectionStrategy            : str,
-    participantsID               : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-    memory                       : dict{key: int, value: dict{key: int, value: float}},
-    memory_array                 : float [n_p, n_p] array,
-    groups_with_memory           : list[list[int]],
-    groups_with_memory_corrected : list[list[int]],
-    memory_evolution             : list[dict{key: int, value: dict{key: int, value: float}}],
-    memory_evolution_video       : VideoWriter,
-    frameIdList                  : list[int],
-    ARI_list1                    : list[float],
-    ARI_list2                    : list[float],
-    labels_pred_t0               : int [n_p] array,
-    logs                         : dict{key: str, value: int | float | list[Tuple[int, float]]},
+    camera                       : Camera, la camera a laquelle la memoire de chaque individus est rattachee
+    savePath                     : str, le chemin du dossier ou les resultats de la memoire de chaque individu sont sauvegardes
+    dt                           : float, le parametre temporel controlant l'evolution de la memoire des individus
+    tau_learn                    : float, le parametre controlant la vitesse d'apprentissage des individus de la scene
+    tau_forget                   : float, le parametre controlant la vitesse d'oubli des individus de la scene
+    memory_threshold             : float, le seuil de la memoire au dessus duquel deux individus sont consideres en interaction
+    cpt                          : int, compteur
+    detectionStrategy            : str, la methode de detection pour laquelle les F-formations retournees seront raffinees par la memoire de chaque participants
+    participantsID               : int [n_p] array (rappel : n_p = nombre de participants dans une scene), les numeros des individus de la scene
+    memory                       : dict{key: int, value: dict{key: int, value: float}}, la memoire de chaque individu de la scene (format dico)
+    memory_array                 : float [n_p, n_p] array, la memoire de chaque individu de la scene (format array)
+    groups_with_memory           : list[list[int]], les groupes obtenus a partir de la memoire de chaque individus
+    groups_with_memory_corrected : list[list[int]], les groupes (corriges) a partir de la memoire de chaque individus
+    memory_evolution             : list[dict{key: int, value: dict{key: int, value: float}}], l'evolution de la memoire de chaque individu de la scene
+    memory_evolution_video       : VideoWriter, l'evolution de la memoire de chaque individu de la scene (ou chaque array correspond a une frame)
+    frameIdList                  : list[int], la liste des frames parcourues
+    ARI_list1                    : list[float], la liste correspondant aux mesures de similarite entre les groupes obtenus a partir de la memoire de chaque
+                                                individus et les groupes de la verite terrain a chaque frame de la liste frameIdList
+    ARI_list2                    : list[float], la liste correspondant aux mesures de similarite entre les groupes obtenus a partir de la memoire de chaque
+                                                individus a l'instant t et ces memes groupes a l'instant t+1 a chaque frame de la liste frameIdList
+    labels_pred_t0               : int [n_p] array, le numero de label de chaque participant au temps t
+    logs                         : dict{key: str, value: int | float | list[Tuple[int, float]]}, les logs correspondant a l'evaluation menee
 
     Methods
     -------
@@ -50,12 +52,12 @@ class ParticipantsMemory(object):
         """
         Parameters
         ----------
-        camera           : Camera,
-        savePath         : str,
-        dt               : float,
-        tau_learn        : float (optional),
-        tau_forget       : float (optional),
-        memory_threshold : float (optional),
+        camera           : Camera, la camera a laquelle la memoire de chaque individus est rattachee
+        savePath         : str, le chemin du dossier ou les resultats de la memoire de chaque individu sont sauvegardes
+        dt               : float, le parametre temporel controlant l'evolution de la memoire des individus
+        tau_learn        : float (optional), le parametre controlant la vitesse d'apprentissage des individus de la scene
+        tau_forget       : float (optional), le parametre controlant la vitesse d'oubli des individus de la scene
+        memory_threshold : float (optional), le seuil de la memoire au dessus duquel deux individus sont consideres en interaction
         """
         #
         self.camera = camera
@@ -102,11 +104,11 @@ class ParticipantsMemory(object):
         """
         Parameters
         ----------
-        participantsID      : int [n_p] array,
-        positions           : float [n_p, 2] array,
-        groups_true         : list[list[int]],
-        groups_pred         : list[list[int]],
-        strategiesActivated : list[str],
+        participantsID      : int [n_p] array, les numeros des individus de la scene
+        positions           : float [n_p, 2] array, les positions des individus de la scene
+        groups_true         : list[list[int]], les groupes verites terrains
+        groups_pred         : list[list[int]], les groupes retournes par la methode de dection de F-formations activee
+        strategiesActivated : list[str], la liste des methodes de detection de F-formations detectees
         """
         # Aucun groupe predit : aucune methode de detection de F-formations est en cours de traitement.
         if groups_pred is None:
@@ -116,7 +118,7 @@ class ParticipantsMemory(object):
                     print('Participants Memory cannot start. No predict F-formation to process.')
                     self.camera.pmActivated = False
                     return
-                # Les participants ne peuvent plus mémoriser les membres de leurs groupes si plus aucune F-formation n'est predite.
+                # Les participants ne peuvent plus memoriser les membres de leurs groupes si plus aucune F-formation n'est predite.
                 else:
                     print('Participants Memory cannot continue. No more predict F-formation.')
                     self.camera.pmActivated = False
@@ -280,11 +282,11 @@ class ParticipantsMemory(object):
         """
         Parameter
         ---------
-        m : float,
+        m : float, memoire d'un individu a un certain instant
 
         Return
         ------
-        m_learn : float,
+        m_learn : float, memoire mise a jour (apprentissage)
         """
         m_learn = (1 - (self.dt / self.tau_learn)) * m + (self.dt / self.tau_learn)
         return m_learn
@@ -293,17 +295,18 @@ class ParticipantsMemory(object):
         """
         Parameter
         ---------
-        m : float,
+        m : float, memoire d'un individu a un certain instant
 
         Return
         ------
-        m_forget : float,
+        m_forget : float, memoire mise a jour (oubli)
         """
         m_forget = (1 - (self.dt / self.tau_forget)) * m
         return m_forget
     
     def __show_memory(self):
         """
+        Affiche la memoire de tous les individus de la scene dans une heatmap.
         """
         img = plot_heatmap_memory(self.memory_array, self.participantsID)
         cv2.imshow('Participants Memory', img)
@@ -315,11 +318,12 @@ class ParticipantsMemory(object):
     
     def __computeGroupsWithMemory(self):
         """
+        Re-calcule les groupes a partir de la memoire de chaque individu, qui est elle meme mise a jour a partir des groupes detectes par la methode de detection.
         """
-        #
+        # cliques du graphe correspondant a la matrice d'adjacacence construite a partir du seuil de la memoire de chaque individu
         pairwise_interaction = self.memory_array >= self.memory_threshold
         cliques = list(enumerate_all_cliques(nx.from_numpy_array(pairwise_interaction)))
-        #
+        # selection des cliques qui sont maximales au sens de l'inclusion
         self.groups_with_memory = []
         for i, clq1 in enumerate(cliques):
             add_clq = True
@@ -330,7 +334,6 @@ class ParticipantsMemory(object):
                         break
             if add_clq:
                 self.groups_with_memory.append(clq1)
-        #
         tmp1 = []
         for group in self.groups_with_memory:
             tmp2 = []
@@ -338,7 +341,7 @@ class ParticipantsMemory(object):
                 tmp2.append(self.participantsID[i])
             tmp1.append(tmp2)
         self.groups_with_memory = tmp1
-        #
+        # selection d'un unique groupe par individu (chaque individu selectionne le groupe pour lequel il a le plus d'adherence)
         self.groups_with_memory_corrected = self.groups_with_memory
         for id in self.participantsID:
             tmp = []
@@ -363,15 +366,17 @@ class ParticipantsMemory(object):
     
     def __membership(self, id, group, method='moy'):
         """
+        Calcule l'adherence du participant possedant le numero id au groupe "group".
+
         Parameters
         ----------
-        id     : int,
-        group  : list[int],
-        method : str (optional),
+        id     : int, le numero du participant en question
+        group  : list[int], la liste des numeros des individus appartenant au meme groupe que id
+        method : str (optional), la methode d'estimation de l'adherence a un groupe
 
         Return
         ------
-        membership : float,
+        membership : float, adherence au groupe
         """
         membership = 0.0
         tmp = [self.memory[id][id1] for id1 in group if id != id1]

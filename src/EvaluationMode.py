@@ -15,9 +15,9 @@ class EvaluationMode(object):
     savePath          : str, le chemin correspondant au dossier ou les resultats du mode "evaluation" s'enregistrent
     detectionStrategy : str, le nom de la methode de detection qui est evaluee
     frameIdList       : list[int], la liste des numeros des frames qui ont ete evaluee
-    ARI_list1         : list[float], la liste correspondant au mesure de similarite entre les F-formations detectees et celles de la verite terrain
+    ARI_list1         : list[float], la liste correspondant aux mesures de similarite entre les F-formations detectees et celles de la verite terrain
                                      a chaque frame de la liste frameIdList
-    ARI_list2         : list[float], la liste correspondant au mesure de similarite entre les F-formations detectees au temps t et celles detectees
+    ARI_list2         : list[float], la liste correspondant aux mesures de similarite entre les F-formations detectees au temps t et celles detectees
                                      au temps t+1 a chaque frame t de la la liste frameIdList
     labels_pred_t0    : int [n_p] array (rappel : n_p = nombre de participants dans une scene), le numero de label de chaque participant au temps t
     logs              : dict{key: str, value: int | float | list[Tuple[int, float]]}, les logs correspondant a l'evaluation menee
