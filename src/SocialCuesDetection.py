@@ -14,11 +14,11 @@ class HumanDetector(object):
 
 	Attributes
 	----------
-	camera        : Camera,
-	savePath      : str,
-	tol           : float,
-	humanDetector : HOGDescriptor,
-	boundingBoxes : float [n_p, 4] array (rappel : n_p = nombre de participants dans une scene),
+	camera        : Camera, la camera a laquelle le detecteur d'individus est rattache
+	savePath      : str, le chemin du dossier dans lequel l'image des individus englobes par les boites englobantes sont enregistres
+	tol           : float, seuil a partir duquel une region de l'image detectee par l'algorithme de detection d'individus est reelement considere comme un invidu
+	humanDetector : HOGDescriptor, detecteur se basant sur un classifieur HOG des individus de la scene
+	boundingBoxes : float [n_p, 4] array (rappel : n_p = nombre de participants dans une scene), la liste des boites englobantes des individus detectes dans la scene
 
 	Methods
 	-------
@@ -33,9 +33,9 @@ class HumanDetector(object):
 		"""
 		Parameters
 		----------
-		camera   : Camera,
-		savePath : str,
-		tol      : float,
+		camera   : Camera, la camera a laquelle le detecteur d'individus est rattache
+		savePath : str, le chemin du dossier dans lequel l'image des individus englobes par les boites englobantes sont enregistres
+		tol      : float, seuil a partir duquel une region de l'image detectee par l'algorithme de detection d'individus est reelement considere comme un invidu
 		"""
 		self.camera = camera
 		self.savePath = savePath
@@ -119,7 +119,7 @@ class HumanDetector(object):
 
 		Parameters
 		----------
-		detectionActivated : bool,
+		detectionActivated : bool, True si la detection des individus de la scene est activee par l'utilisateur, False sinon
 		"""
 		if detectionActivated:
 			gray = cv2.cvtColor(self.camera.frame, cv2.COLOR_BGR2GRAY)
@@ -149,7 +149,7 @@ class HumanDetector(object):
 
 		Parameters
 		----------
-		manual_annotations : list[list],
+		manual_annotations : list[list], l'ensemble des annotations fournies par la base de donnes Mingle pour la frame courante
 		"""
 		if self.camera.savePositiveSamples:
 			path = self.savePath+'trainingData/positiveSamples/'
@@ -181,39 +181,3 @@ class HumanDetector(object):
 							image.save(path+str(im_filename+cpt)+'.jpg')
 							cpt += 1
 			self.camera.savePositiveSamples = False
-
-class BodyPoseDetector(object):
-	"""
-	La classe BodyPoseDetector permet de detecter l'orientation du corps d'un individu.
-
-	Attributes
-	----------
-	camera : Camera,
-	boundingBoxes : float [n_p, 4] array,
-
-	Methods
-	-------
-	update : public
-	"""
-
-	def __init__(self, camera):
-		"""
-		Parameters
-		----------
-		camera : Camera,
-		"""
-		self.camera = camera
-		self.boundingBoxes = None
-	
-	def update(self, boundingBoxes):
-		"""
-		Mise a jour du detecteur.
-
-		Parameters
-		----------
-		boundingBoxes : float [n_p, 4] array,
-		"""
-		self.boundingBoxes = boundingBoxes
-		for i, (x1, y1, x2, y2) in enumerate(self.boundingBoxes):
-			image = cv2.cvtColor(self.camera.frame[y1:(y2+1),x1:(x2+1)], cv2.COLOR_BGR2GRAY)
-			##### TO DO

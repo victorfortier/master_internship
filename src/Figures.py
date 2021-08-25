@@ -24,17 +24,17 @@ def plot_o_centers(nbRows, nbColumns, d, participantsID, positions, orientations
 
     Parameters
     ----------
-    nbRows         : int,
-    nbColumns      : int,
-    d              : float,
-    participantsID : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-    positions      : float [n_p, 2] array,
-    orientations   : float [n_p] array,
-    o_centers      : int [n_p, 2] array,
+    nbRows         : int, le nombre de lignes de l'array correspondant a l'image de la scene
+    nbColumns      : int, le nombre de colonnes de l'array correspondant a l'image de la scene
+    d              : float, la distance a laquelle les centres de O-spaces sont votes
+    participantsID : int [n_p] array (rappel : n_p = nombre de participants dans une scene), les numeros des participants de la scene
+    positions      : float [n_p, 2] array, les positions des participants a la scene
+    orientations   : float [n_p] array, l'orientation de chaque participants a la scene
+    o_centers      : int [n_p, 2] array, les centres des O-spaces votes par les individus
 
     Return
     ------
-    img : int [h, w, 3] array,
+    img : int [h, w, 3] array, la figure illustrant les individus (leurs positions et leurs orientations) et leurs votes de centre de O-space
     """
     delta = np.int64(d)
     wfig, hfig = nbColumns+2*delta, nbRows+2*delta
@@ -70,18 +70,18 @@ def plot_visualFields(nbRows, nbColumns, alpha, d, participantsID, positions, or
 
     Parameters
     ----------
-    nbRows         : int,
-    nbColumns      : int,
-    alpha          : float,
-    d              : float,
-    participantsID : int [n_p] array,
-    positions      : float [n_p, 2] array,
-    orientations   : float [n_p] array,
-    visualFields   : int [n_p, n_samples, 2] array (rappel : n_samples = nombre de votes realises par chaque individu),
+    nbRows         : int, le nombre de lignes de l'array correspondant a l'image de la scene
+    nbColumns      : int, le nombre de colonnes de l'array correspondant a l'image de la scene
+    alpha          : float, l'angle de vision de chaque individu de la scene
+    d              : float, la distance maximale a laquelle les individus votent
+    participantsID : int [n_p] array, les numeros des individus de la scene
+    positions      : float [n_p, 2] array, les positions des individus de la scene
+    orientations   : float [n_p] array, l'orientation de chaque individu de la scene
+    visualFields   : int [n_p, n_samples, 2] array (rappel : n_samples = nombre de votes realises par chaque individu), les champs visuels de chaque individu
 
     Return
     ------
-    img : int [h, w, 3] array,
+    img : int [h, w, 3] array, la figure illustrant les individus (leurs positions et les limites de leurs champs visuels) et leurs champs visuels
     """
     delta = np.int64(d)
     def plot_visualFieldsLimits():
@@ -135,16 +135,16 @@ def plot_clustering(nbRows, nbColumns, d, positions, DATA, labels):
 
     Parameters
     ----------
-    nbRows    : int,
-    nbColumns : int,
-    d         : float,
-    positions : float [n_p, 2] array,
-    DATA      : int [n_p, 2] array,
-    labels    : list[int] (de taille n_data),
+    nbRows    : int, le nombre de lignes de l'array correspondant a l'image de la scene
+    nbColumns : int, le nombre de colonnes de l'array correspondant a l'image de la scene
+    d         : float, la distance maximale a laquelle chaque individu peut voter
+    positions : float [n_p, 2] array, les positions des individus de la scene
+    DATA      : int [n_p, 2] array, les positions des donnees votees par les individus de la scene
+    labels    : list[int] (de taille n_data), les labels des donnes votees par les individus de la scene
 
     Return
     ------
-    img : int [h, w, 3] array,
+    img : int [h, w, 3] array, la figure illustrant la position des individus et les clusters de donnees
     """
     delta = np.int64(d)
     wfig, hfig = nbColumns+2*delta, nbRows+2*delta
@@ -179,15 +179,15 @@ def plot_f_formation(nbRows, nbColumns, participantsID, positions, f_formation):
 
     Parameters
     ----------
-    nbRows         : int,
-    nbColumns      : int,
-    participantsID : int [n_p] array,
-    positions      : float [n_p, 2] array,
-    f_formation    : list[list[int]],
+    nbRows         : int, le nombre de lignes de l'array correspondant a l'image de la scene
+    nbColumns      : int, le nombre de colonnes de l'array correspondant a l'image de la scene
+    participantsID : int [n_p] array, les numeros des individus de la scene
+    positions      : float [n_p, 2] array, les positions des individus de la scene
+    f_formation    : list[list[int]], les F-formations a afficher
 
     Return
     ------
-    img : int [h, w, 3] array,
+    img : int [h, w, 3] array, la figure illustrant les F-formations de la scene
     """
     fig = plt.figure()
     fig.set_size_inches(nbColumns/dpi, nbRows/dpi)
@@ -241,10 +241,10 @@ def save_ARI_curve(ARI_list, frameIdList, title, filename):
 
     Parameters
     ----------
-    ARI_list    : list[float],
-    frameIdList : list[int],
-    title       : str,
-    filename    : str,
+    ARI_list    : list[float], liste de mesure de similarite
+    frameIdList : list[int], liste des numeros de frame
+    title       : str, le titre du graphique
+    filename    : str, le nom du fichier a sauvegarder
     """
     fig = plt.figure()
     ax = fig.gca()
@@ -263,13 +263,13 @@ def save_heatmap2D(heatmap, rows_range, columns_range, xlabel, ylabel, title, fi
 
     Parameters
     ----------
-    heatmap       : float [n_x, n_y] array,
-    rows_range    : float [n_x] array,
-    columns_range : float [n_y] array,
-    xlabel        : str,
-    ylabel        : str,
-    title         : str,
-    filename      : str,
+    heatmap       : float [n_x, n_y] array, une heatmap 2D
+    rows_range    : float [n_x] array, le nombre de lignes de la heatmap
+    columns_range : float [n_y] array, le nombre de colonnes de la heatmap
+    xlabel        : str, le label de l'axe x
+    ylabel        : str, le label de l'axe y
+    title         : str, le titre de la heatmap
+    filename      : str, le nom du fichier a sauvegarder
     """
     index = ['%.2f' % r for r in rows_range.tolist()]
     columns = ['%.2f' % c for c in columns_range.tolist()]
@@ -288,16 +288,16 @@ def save_heatmap3D(heatmap, x_range, y_range, z_range, heat_label, x_label, y_la
 
     Parameters
     ----------
-    heatmap    : float [n_x, n_y, n_z] array,
-    x_range    : float [n_x] array,
-    y_range    : float [n_y] array,
-    z_range    : float [n_z] array,
-    heat_label : str,
-    x_label    : str,
-    y_label    : str,
-    z_label    : str,
-    title      : str,
-    filename   : str,
+    heatmap    : float [n_x, n_y, n_z] array, une heatmap 3D
+    x_range    : float [n_x] array, les valeurs prises par l'axe x
+    y_range    : float [n_y] array, les valeurs prises par l'axe y
+    z_range    : float [n_z] array, les valeurs prises par l'axe z
+    heat_label : str, SC (Stability Coefficient) ou EC (Evaluation Coefficient)
+    x_label    : str, le label de l'axe x
+    y_label    : str, le label de l'axe y
+    z_label    : str, le label de l'axe z
+    title      : str, le titre de la heatmap
+    filename   : str, le nom du fichier a sauvegarder
     """
     df = []
     for i in range(x_range.size):
@@ -319,12 +319,12 @@ def plot_heatmap_memory(heatmap, rows_and_columns):
 
     Parameters
     ----------
-    heatmap          : float [n_p, n_p] array,
-    rows_and_columns : int [n_p] array,
+    heatmap          : float [n_p, n_p] array, la heatmap correspondante a la memoire de chaque individu de la scene
+    rows_and_columns : int [n_p] array, les valeurs prises par chaque axe
 
     Return
     ------
-    img : int [h, w, 3] array,
+    img : int [h, w, 3] array, la figure illustrant la memoire de chaque individu de la scene
     """
     index = ['%d' % rc for rc in rows_and_columns.tolist()]
     columns = ['%d' % rc for rc in rows_and_columns.tolist()]
@@ -342,11 +342,11 @@ def save_memory_evolution(graphiques, id1, frameIdList, frameStep, filename):
     """
     Parameters
     ----------
-    graphiques  : dict{key: int, value: dict{key: int, value: Tuple[list[float], list[int]]}},
-    id1         : int,
-    frameIdList : list[int]
-    frameStep   : int,
-    filename    : str,
+    graphiques  : dict{key: int, value: dict{key: int, value: Tuple[list[float], list[int]]}}, evolution de la memoire de chaque individu de la scene
+    id1         : int, le numero de l'individu pour lequel la courbe de la memoire sera enregistree
+    frameIdList : list[int], la liste des frames parcourues
+    frameStep   : int, le pas de frames
+    filename    : str, le nom du fichier a sauvegarder
     """
     graphique = graphiques[id1]
     nbX, nbY = int(np.ceil(len(graphique)/3)), 3
