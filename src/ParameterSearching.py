@@ -8,16 +8,16 @@ class ParameterSearching(object):
 
     Attributes
     ----------
-    camera     : Camera,
-    savePath   : str,
-    frameStart : int,
-    frameEnd   : int,
-    alphaRange : float [n_x] array,
-    betaRange  : float [n_y] array,
-    gammaRange : float [n_z] array,
-    cpt        : list[int] (de taille 3),
-    heatMap_EC : float [n_x, n_y, n_z] array,
-    heatMap_SC : float [n_x, n_y, n_z] array,
+    camera     : Camera, la camera a laquelle la "recherche de parametres" est rattachee
+    savePath   : str, le chemin correspondant au dossier ou les resultats de la "recherche de parametres" s'enregistrent
+    frameStart : int, la frame de depart pour la "recherche de parametres"
+    frameEnd   : int, la frame de fin pour la "recherche de parametres"
+    alphaRange : float [n_x] array, les differentes valeurs du premier parametre de l'algorithme 3
+    betaRange  : float [n_y] array, les differentes valeurs du deuxieme parametre de l'algorithme 3
+    gammaRange : float [n_z] array, les differentes valeurs du troisieme parametre de l'algorithme 3
+    cpt        : list[int] (de taille 3), compteur
+    heatMap_EC : float [n_x, n_y, n_z] array, la heatmap correspondant a l'evaluation des F-formations retournees par l'algorithme 3 (leurs similarites a la verite terrain)
+    heatMap_SC : float [n_x, n_y, n_z] array, la heatmap correspondant a la stabilite des F-formations retournees par l'algorithme 3
 
     Method
     ------
@@ -28,19 +28,19 @@ class ParameterSearching(object):
         """
         Parameters
         ----------
-        camera     : Camera,
-        savePath   : str,
-        frameStart : int,
-        frameEnd   : int,
-        alphaMin   : float,
-        alphaMax   : float,
-        alphaStep  : float,
-        betaMin    : float,
-        betaMax    : float,
-        betaStep   : float,
-        gammaMin   : float,
-        gammaMax   : float,
-        gammaStep  : float,
+        camera     : Camera, la camera a laquelle la "recherche de parametres" est rattachee
+        savePath   : str, le chemin correspondant au dossier ou les resultats de la "recherche de parametres" s'enregistrent
+        frameStart : int, la frame de depart pour la "recherche de parametres"
+        frameEnd   : int, la frame de fin pour la "recherche de parametres"
+        alphaMin    : float, valeur minimale pour le premier parametre de l'algorithme 3 de detection de F-formations
+        alphaMax    : float, valeur maximale pour le premier parametre de l'algorithme 3 de detection de F-formations
+        alphaStep   : float, valeur du pas pour le premier parametre de l'algorithme 3 de detection de F-formations
+        betaMin     : float, valeur minimale pour le deuxieme parametre de l'algorithme 3 de detection de F-formations
+        betaMax     : float, valeur maximale pour le deuxieme parametre de l'algorithme 3 de detection de F-formations
+        betaStep    : float, valeur du pas pour le deuxieme parametre de l'algorithme 3 de detection de F-formations
+        gammaMin    : float, valeur minimale pour le troisieme parametre de l'algorithme 3 de detection de F-formations
+        gammaMax    : float, valeur maximale pour le troisieme parametre de l'algorithme 3 de detection de F-formations
+        gammaStep   : float, valeur du pas pour le troisieme parametre de l'algorithme 3 de detection de F-formations
         """
         self.camera = camera
         self.savePath = savePath
@@ -59,9 +59,9 @@ class ParameterSearching(object):
 
         Parameters
         ----------
-        participantsID   : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-        f_formation_true : list[list[int]],
-        f_formation_pred : list[list[int]],
+        participantsID   : int [n_p] array (rappel : n_p = nombre de participants dans une scene), les numero des participants a la scene
+        f_formation_true : list[list[int]], les F-formations verites terrains
+        f_formation_pred : list[list[int]], les F-formations detectees par l'algorithme evalue
         """
         if self.camera.psActivated:
             if self.camera.frameId >= self.frameEnd:

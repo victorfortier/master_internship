@@ -11,7 +11,7 @@ class EvaluationMode(object):
 
     Attributes
     ----------
-    camera            : Camera, la camera a laquelle le mode "evaluation" est rattachee
+    camera            : Camera, la camera a laquelle le mode "evaluation" est rattache
     savePath          : str, le chemin correspondant au dossier ou les resultats du mode "evaluation" s'enregistrent
     detectionStrategy : str, le nom de la methode de detection qui est evaluee
     frameIdList       : list[int], la liste des numeros des frames qui ont ete evaluee
@@ -73,7 +73,7 @@ class EvaluationMode(object):
 
         Return
         ------
-        path : str,
+        path : str, le chemin ou le dossier contenant tous les resultats des evaluations s'enregistrent
         """
         # Aucune F-formation predite : aucune methode de detection de F-formations est en cours de traitement.
         if f_formation_pred is None:

@@ -13,14 +13,14 @@ def naiveStrategy(image, participantsID, positions, beta=0.2):
 
     Parameters
     ----------
-    image          : int [h, w] array,
-    participantsID : int [n_p] array (rappel : n_p = nombre de participants dans une scene),
-    positions      : float [n_p, 2] array,
-    beta           : float (optional),
+    image          : int [h, w] array, l'image de la scene sur laquelle les groupes seront detectes
+    participantsID : int [n_p] array (rappel : n_p = nombre de participants dans une scene), les numeros des participants a la scene
+    positions      : float [n_p, 2] array, les positions des participants a la scene
+    beta           : float (optional), parametre qui controle la distance maximale a partir de laquelle deux personnes sont consideres en interactions
 
     Return
     ------
-    f_formation : list[list[int]],
+    f_formation : list[list[int]], les F-formations detectees par l'algorithme
     """
     if participantsID.shape[0] != positions.shape[0]:
         return []
@@ -53,16 +53,16 @@ def oCentersClusteringStrategy(image, participantsID, positions, orientations, b
 
     Parameters
     ----------
-    image          : int [h, w] array,
-    participantsID : int [n_p] array,
-    positions      : float [n_p, 2] array,
-    orientations   : float [n_p] array,
-    beta           : float (optional),
-    verbose        : bool (optional),
+    image          : int [h, w] array, l'image de la scene sur laquelle les groupes seront detectes
+    participantsID : int [n_p] array, les numeros des participants a la scene
+    positions      : float [n_p, 2] array, les positions des participants a la scene
+    orientations   : float [n_p] array, l'orientation de chaque participants a la scene
+    beta           : float (optional), le parametre qui controle la distance a laquelle un individu vote
+    verbose        : bool (optional), True si les etapes intermediaires de l'algorithmes sont affichees, False sinon
     
     Return
     ------
-    f_formation : list[list[int]],
+    f_formation : list[list[int]], les F-formations detectees par l'algorithme
     """
     if participantsID.shape[0] != positions.shape[0] or positions.shape[0] != orientations.shape[0]:
         return []
@@ -105,19 +105,19 @@ def visualFieldsClusteringStrategy(image, participantsID, positions, orientation
 
     Parameters
     ----------
-    image           : int [h, w] array,
-    participantsID  : int [n_p] array,
-    positions       : float [n_p, 2] array,
-    orientations    : float [n_p] array,
-    numberOfSamples : int (optional),
-    alpha           : float (optional),
-    beta            : float (optional),
-    gamma           : float (optional),
-    verbose         : bool (optional),
+    image           : int [h, w] array, l'image de la scene sur laquelle les groupes seront detectes
+    participantsID  : int [n_p] array, les numeros des participants a la scene
+    positions       : float [n_p, 2] array, les positions des participants a la scene
+    orientations    : float [n_p] array, l'orientation de chaque participants a la scene
+    numberOfSamples : int (optional), le nombre d'echantillons votes par chaque individu
+    alpha           : float (optional), le parametre qui controle l'angle de vision de chaque individu de la scene
+    beta            : float (optional), le parametre qui controle la distance maximale de la vision de chaque individu de la scene
+    gamma           : float (optional), le parametre qui controle la distance minimale de la vision de chaque individu de la scene
+    verbose         : bool (optional), True si les etapes intermediaires de l'algorithmes sont affichees, False sinon
     
     Return
     ------
-    f_formation : list[list[int]],
+    f_formation : list[list[int]], les F-formations detectees par l'algorithme
     """
     if participantsID.shape[0] != positions.shape[0] or positions.shape[0] != orientations.shape[0]:
         return []
