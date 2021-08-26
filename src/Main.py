@@ -161,8 +161,12 @@ data = openCSV(filename).astype(np.int64)
 print("DATA array shape =", data.shape)
 
 # LABELS
-filename = datasetPath+'manual_annotations/ LABELS.csv'
-labels = openCSV(filename).astype(np.int64)
+try:
+	filename = datasetPath+'manual_annotations/LABELS.csv'
+	labels = openCSV(filename).astype(np.int64)
+except FileNotFoundError:
+	filename = datasetPath+'manual_annotations/ LABELS.csv'
+	labels = openCSV(filename).astype(np.int64)
 print("LABELS array shape =", labels.shape)
 
 # KEYPOINTS & ORIENTATIONS
