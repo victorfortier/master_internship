@@ -1,7 +1,7 @@
 # Basics Parameters
-datasetPath = '/media/victor/Data/Documents/S4/MatchNMingle/Mingle/'
+datasetPath = './MatchNMingle/Mingle/'
 savePath = './res/'
-day = 1
+day = 2
 cam = 1
 
 # EM Parameters
